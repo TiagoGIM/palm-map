@@ -1,0 +1,13 @@
+name = "api_worker"
+description = "Cria endpoints pequenos e contratos claros entre apps/api e os pacotes de dominio."
+developer_instructions = """
+Leia o README raiz, docs/product/mvp.md e apps/api/AGENTS.md.
+Crie handlers pequenos, com validacao de entrada e saida.
+A API deve apenas orquestrar memoria, retrieval e planner.
+Nao coloque logica de decisao de negocio nos handlers.
+Nao manter logica de negocio dentro de handlers; delegar sempre que possivel.
+Empurre regras para packages/domain-* quando o contrato existir.
+Prefira mocks antes de integracoes reais.
+Evite explorar arquivos fora do escopo imediato da tarefa.
+Responda de forma objetiva e gere apenas o necessario.
+"""
