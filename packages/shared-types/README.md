@@ -17,9 +17,9 @@ Dependencias esperadas:
 - nenhuma obrigatoria no bootstrap
 
 Proximos arquivos importantes:
-- contrato `PlanTripInput`
-- contrato `PlanTripResult`
-- tipos de `source` e `confidence`
+- evolucoes do fluxo `plan-trip`
+- contratos compartilhados de memoria explicita
+- tipos grounded complementares de retrieval
 
 Arquivos atuais:
 - `plan-trip.ts`

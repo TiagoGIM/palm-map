@@ -15,8 +15,4 @@
 
 - Nao acople diretamente a camada ao frontend.
 - Prefira contratos claros para leitura e escrita de preferencias.
-
-- Cada item de memoria deve conter no minimo:
-  - key
-  - value
-  - created_at
+- Mantenha os registros simples, auditaveis e alinhados aos contratos compartilhados quando eles existirem.

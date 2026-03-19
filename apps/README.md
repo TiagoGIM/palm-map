@@ -10,8 +10,8 @@ Nao pertence aqui:
 - regras de dominio compartilhadas
 - tipos comuns reutilizaveis
 
-- Aplicacoes nao devem conter logica de dominio.
-- Toda regra deve residir em `packages/domain-*`.
+- Aplicacoes devem evitar logica de dominio sempre que houver contrato ou pacote apropriado.
+- Validacao de borda, serializacao e orquestracao podem permanecer nas apps quando fizer sentido.
 
 - `web` consome `api`.
 - `api` orquestra dominios em `packages/`.
