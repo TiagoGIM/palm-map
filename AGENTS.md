@@ -16,6 +16,9 @@
 - Prefira mocks, fixtures e adaptadores simples antes de integracoes reais.
 - Respeite a separacao entre dominios, apps e agentes.
 - Ao tocar mais de um dominio, explicite os contratos entre eles.
+- Use `README.md` para contexto global e `AGENTS.md` para regras de execucao.
+- Ao entrar em uma pasta com `README.md` e `AGENTS.md`, prefira o contexto local dessa area.
+- Use `.codex/agents/` apenas para prompts e playbooks reutilizaveis, nao como fonte primaria de verdade.
 
 - Antes de mudancas estruturais, leia `README.md` e `docs/product/mvp.md`.
 

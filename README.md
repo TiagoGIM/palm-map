@@ -121,6 +121,14 @@ type TripPlan = {
 - usar `AGENTS.md` para contexto operacional antes de implementar
 - usar subagents por papel quando o trabalho puder ser isolado
 
+## Papel de README, AGENTS e .codex/agents
+
+- `README.md`: visao global do produto, fluxo do MVP e mapa do repositorio
+- `AGENTS.md`: regras operacionais e limites de implementacao
+- `README.md` local: responsabilidade da area e arquivos importantes
+- `AGENTS.md` local: instrucoes especificas da pasta afetada
+- `.codex/agents/`: prompts e playbooks reutilizaveis para tarefas recorrentes
+
 ## Como Usar Este Repositorio com AGENTS.md e Subagents
 
 1. ler este `README.md`
