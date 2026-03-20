@@ -1,0 +1,133 @@
+@import './tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: rgb(var(--color-bg));
+  color: rgb(var(--color-on-surface));
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: var(--font-size-md);
+}
+
+.app-shell {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-4);
+  display: grid;
+  gap: var(--space-4);
+}
+
+.app-title {
+  margin: 0;
+  font-size: var(--font-size-xl);
+}
+
+.trip-form {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: rgb(var(--color-surface));
+  border: 1px solid rgb(var(--color-outline));
+  box-shadow: var(--elevation-1);
+}
+
+.trip-form label {
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+.trip-form input,
+.trip-form textarea,
+.trip-form button {
+  font: inherit;
+}
+
+.trip-form input,
+.trip-form textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgb(var(--color-outline));
+  border-radius: var(--radius-sm);
+  background: rgb(var(--color-surface));
+  color: rgb(var(--color-on-surface));
+}
+
+.trip-form button {
+  padding: 10px 14px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: rgb(var(--color-primary));
+  color: rgb(var(--color-surface));
+  font-weight: 600;
+  transition: opacity var(--motion-fast) ease;
+}
+
+.trip-form button:disabled {
+  opacity: 0.7;
+}
+
+.error-note {
+  margin: 0;
+  color: rgb(var(--color-error));
+  background: rgb(var(--color-error-surface));
+  border: 1px solid rgb(var(--color-error) / 0.25);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+
+.trip-result {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.effective-pref-note {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: rgb(var(--color-on-muted));
+}
+
+.warnings-box {
+  border: 1px solid rgb(var(--color-warning) / 0.35);
+  border-radius: var(--radius-md);
+  background: rgb(var(--color-warning-surface));
+  padding: 10px 12px;
+}
+
+.warnings-box h2 {
+  margin: 0 0 6px;
+  font-size: var(--font-size-md);
+}
+
+.warnings-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.day-card {
+  border: 1px solid rgb(var(--color-outline));
+  border-radius: var(--radius-md);
+  background: rgb(var(--color-surface));
+  padding: 10px 12px;
+  box-shadow: var(--elevation-1);
+}
+
+.day-card h2 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-lg);
+}
+
+.day-items {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+}

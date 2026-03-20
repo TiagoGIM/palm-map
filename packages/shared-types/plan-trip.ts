@@ -33,6 +33,8 @@ export type DayPlan = {
 /** Result returned by the MVP plan-trip flow. */
 export type PlanTripResult = {
   days: DayPlan[]
+  /** Preference text effectively used for the current planning request. */
+  effectivePreferencesText?: string
   /** Optional notes when fixture or retrieval data is incomplete. */
   warnings?: string[]
 }

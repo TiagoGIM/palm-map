@@ -29,3 +29,4 @@
 - Nao explorar o repositorio inteiro; ler apenas o necessario para a tarefa.
 - Sempre que possivel, usar contratos definidos em packages/shared-types.
 - Nao inferir regras de negocio fora dos contratos ou do escopo da tarefa.
+- Use `pnpm` como package manager padrao do repositorio (instalar dependencias e rodar scripts).

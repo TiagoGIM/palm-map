@@ -53,6 +53,7 @@ const result = {
       ],
     },
   ],
+  effectivePreferencesText: 'gosto de praia, comida local e ritmo tranquilo',
   warnings: ['faltam opcoes grounded para a noite do dia 2'],
 }
 ```

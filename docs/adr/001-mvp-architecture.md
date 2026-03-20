@@ -41,3 +41,11 @@ O MVP precisa ser barato, mobile first e confiavel o bastante para nao inventar 
 - Menor velocidade inicial de desenvolvimento.
 - Maior necessidade de disciplina na definicao de contratos.
 - Complexidade ligeiramente maior na estrutura do repositorio em troca de previsibilidade futura.
+
+## Relationship to newer ADRs
+
+This ADR remains the architectural base for the MVP phase.
+
+For the transition from scaffold to real retrieval, staging infrastructure, and cloud-cost-first execution, see:
+
+- ADR 002: RAG Real, Infra de Staging e Stack Cloud-Cost-First

@@ -1,0 +1,30 @@
+name = "palm-map-api"
+main = "worker.ts"
+compatibility_date = "2026-03-20"
+
+[vars]
+APP_ENV = "local"
+API_ALLOWED_ORIGIN = "*"
+# Placeholder names for future data bindings
+D1_BINDING_NAME = "PALM_MAP_DB"
+VECTORIZE_BINDING_NAME = "PALM_MAP_INDEX"
+
+[env.staging]
+name = "palm-map-api-staging"
+
+[env.staging.vars]
+APP_ENV = "staging"
+API_ALLOWED_ORIGIN = "*"
+# Keep placeholders explicit for staged rollout.
+D1_BINDING_NAME = "PALM_MAP_DB"
+VECTORIZE_BINDING_NAME = "PALM_MAP_INDEX"
+
+# Future bindings (enable when resources exist):
+# [[env.staging.d1_databases]]
+# binding = "PALM_MAP_DB"
+# database_name = "palm-map-staging"
+# database_id = "<d1-database-id>"
+#
+# [[env.staging.vectorize]]
+# binding = "PALM_MAP_INDEX"
+# index_name = "palm-map-staging-index"

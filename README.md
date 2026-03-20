@@ -47,6 +47,11 @@ Entregar um fluxo simples que gere um roteiro validado, baseado em preferencias 
 
 Se precisarmos fixar uma stack depois, uma composicao simples com web leve, API HTTP enxuta e pacotes compartilhados em TypeScript e um bom caminho, mas isso ainda nao bloqueia o bootstrap.
 
+## Package Manager
+
+- package manager padrao do repositorio: `pnpm`
+- para instalar dependencias e rodar scripts, prefira `pnpm` em vez de `npm`
+
 ## Estrutura de Pastas
 
 ```text

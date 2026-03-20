@@ -1,5 +1,6 @@
 import { placeFixturesByDestination } from '../../packages/domain-retrieval/fixtures'
-import { buildPlanTripResult } from '../../packages/domain-trip'
+import { resolveEffectivePreferencesText } from '../../packages/domain-memory'
+import { buildPlanTripResult, rankPlacesByPreferences } from '../../packages/domain-trip'
 import type { PlanTripInput, PlanTripResult } from '../../packages/shared-types'
 
 type ApiErrorBody = {
@@ -36,6 +37,10 @@ export function handlePlanTrip(requestBody: unknown): PlanTripHttpResponse {
     }
   }
 
+  const effectivePreferencesText = resolveEffectivePreferencesText(
+    input.preferencesText,
+  )
+
   const destinationKey = normalizeDestination(input.destination)
   const places = placeFixturesByDestination[destinationKey]
 
@@ -51,14 +56,22 @@ export function handlePlanTrip(requestBody: unknown): PlanTripHttpResponse {
     }
   }
 
+  const rankedPlaces = rankPlacesByPreferences({
+    places,
+    preferencesText: effectivePreferencesText,
+  })
+
   const result: PlanTripResult = buildPlanTripResult({
     days: input.days,
-    places,
+    places: rankedPlaces,
   })
 
   return {
     status: 200,
-    body: result,
+    body: {
+      ...result,
+      effectivePreferencesText,
+    },
   }
 }
 
