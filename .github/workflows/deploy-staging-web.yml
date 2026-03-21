@@ -44,4 +44,4 @@ jobs:
         run: pnpm --dir apps/web build:staging
 
       - name: Deploy web to Cloudflare Pages staging
-        run: pnpm --dir apps/web exec wrangler pages deploy dist --project-name "$CLOUDFLARE_PAGES_PROJECT_STAGING" --branch staging
+        run: pnpm --dir apps/web exec wrangler pages deploy dist --project-name "$CLOUDFLARE_PAGES_PROJECT_STAGING"

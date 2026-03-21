@@ -73,9 +73,9 @@ Validacao rapida do fluxo conversacional:
 
 Staging (Cloudflare Pages):
 - build/deploy do web preparado para Pages
-- script local de deploy preview/staging: `pnpm --dir apps/web deploy:preview`
-- script seguro para staging publicado: `pnpm --dir apps/web deploy:staging`
-- o script de staging procura `VITE_API_BASE_URL` nesta ordem:
+- URL de staging: `https://palm-map-web-staging.pages.dev`
+- script local de deploy: `pnpm --dir apps/web deploy:staging`
+- o script procura `VITE_API_BASE_URL` nesta ordem:
   - env do shell
   - `apps/web/.env.staging.local`
   - `apps/web/.env.local`
@@ -105,6 +105,7 @@ Como validar local e staging:
    - preencher `VITE_API_BASE_URL` com a URL publica do Worker de staging
    - rodar `pnpm --dir apps/web deploy:staging`
    - o script bloqueia o deploy se a env estiver ausente ou invalida
+   - apos o deploy, o app fica disponivel em `https://palm-map-web-staging.pages.dev`
 
 Modelo de estilos inicial (MVP):
 - guideline visual: Material Design (principios), sem framework pesado de componentes

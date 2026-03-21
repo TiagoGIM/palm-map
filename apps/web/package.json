@@ -9,7 +9,7 @@
     "check:staging-env": "node -e \"if (!process.env.VITE_API_BASE_URL) { console.error('Missing VITE_API_BASE_URL for published web build'); process.exit(1) }\"",
     "build:staging": "pnpm check:staging-env && tsc -p tsconfig.json && vite build",
     "preview": "vite preview",
-    "deploy:preview": "wrangler pages deploy dist --project-name palm-map-web-staging --branch staging",
+    "deploy:preview": "wrangler pages deploy dist --project-name palm-map-web-staging",
     "deploy:staging": "node ./scripts/deploy-staging.mjs"
   },
   "dependencies": {
