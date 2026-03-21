@@ -165,3 +165,25 @@ type TripPlan = {
 - criar fixtures de retrieval com `source` e `confidence`
 - montar um esqueleto de UI mobile first em `apps/web`
 - expor um endpoint pequeno na `apps/api` para orquestrar o MVP
+
+## Checklist Consolidacao (Conversa + Retrieval)
+
+Onde estamos:
+- [x] fluxo conversacional com `TripState`, `stops`, `savedPlaces` e `tripLegs`
+- [x] endpoint isolado de retrieval (`POST /retrieve`) com dataset Recife v1
+- [x] ingest local com schema canonico e artefato inspecionavel
+- [x] conversa integrada a retrieval grounded por cidade em foco
+- [x] sugestoes retornadas de forma estruturada + mensagem curta de assistente
+- [x] salvar sugestao por referencia (`salva a primeira opcao`) em `savedPlaces`
+
+Para onde estamos indo (proximo ciclo):
+- [ ] integrar retrieval grounded ao planner de forma controlada
+- [ ] expandir dataset para alem de Recife com mesma disciplina de schema
+- [ ] melhorar ranking (filtros por categoria, regiao e preferencia explicita)
+- [ ] evoluir UX para destacar sugestoes grounded e salvar com um toque
+
+O que ainda falta para RAG mais completo:
+- [ ] fonte de dados externa/versionamento de ingest (alem de dataset manual)
+- [ ] metrica minima de qualidade (precision@k offline simples)
+- [ ] trilha de observabilidade para consultas e qualidade de resposta
+- [ ] estrategia de refresh de dataset e rollout por cidade

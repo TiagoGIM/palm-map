@@ -65,9 +65,10 @@ Validacao rapida do fluxo conversacional:
    - `Quero ficar 2 dias em Maceio`
 5. confirmar na UI:
    - mensagem do usuario
-   - resposta textual do sistema
-   - `nextQuestion` quando faltar dado
+   - `assistantMessage` como texto principal da resposta
+   - `nextQuestion` apenas quando houver pergunta real
    - `suggestedRoute` quando vier da API
+   - `groundedSuggestions` com botoes de acao `Salvar opcao N`
 
 Staging (Cloudflare Pages):
 - build/deploy do web preparado para Pages

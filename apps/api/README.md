@@ -40,11 +40,17 @@ Como rodar localmente (Cloudflare Worker):
 2. `pnpm install`
 3. `pnpm dev`
 
+Para preparar o artefato local de retrieval (Recife v1) antes do teste de `/retrieve`:
+1. `cd /repo-root`
+2. `node packages/domain-retrieval/scripts/ingest-recife-v1.mjs`
+
 Endpoint local:
 - `POST http://localhost:3001/plan-trip`
 - compativel tambem com `POST http://localhost:3001/api/plan-trip` (usado pela UI atual)
 - `POST http://localhost:3001/conversation/update`
 - compativel tambem com `POST http://localhost:3001/api/conversation/update`
+- `POST http://localhost:3001/retrieve`
+- compativel tambem com `POST http://localhost:3001/api/retrieve`
 
 Exemplos de teste rapido:
 
@@ -72,6 +78,12 @@ curl -sS -X POST http://localhost:3001/conversation/update \
   -d '{"message":"Quero viajar de Fortaleza para Recife por 5 dias. Gosto de praia e nao curto balada."}'
 ```
 
+```bash
+curl -sS -X POST http://localhost:3001/retrieve \
+  -H 'content-type: application/json' \
+  -d '{"query":"museu e historia","city":"Recife","topK":3}'
+```
+
 Exemplo de resposta conversacional:
 
 ```json
@@ -92,7 +104,10 @@ Exemplo de resposta conversacional:
       { "city": "Recife", "role": "destination" }
     ],
     "daysTotal": 5
-  }
+  },
+  "tripLegs": [
+    { "fromCity": "Fortaleza", "toCity": "Recife", "order": 1 }
+  ]
 }
 ```
 
@@ -108,6 +123,100 @@ Quando faltar informacao minima, a API retorna `nextQuestion`:
   "nextQuestion": "De qual cidade voce vai sair?"
 }
 ```
+
+`/retrieve` (RAG local minimo):
+- entrada: `query`, `city`, `topK` (opcional)
+- usa artefato local gerado por ingest (`packages/domain-retrieval/artifacts/recife-v1.chunks.*`)
+- escopo inicial: somente dataset Recife v1
+
+Exemplo de resposta:
+
+```json
+{
+  "query": "museu e historia",
+  "city": "Recife",
+  "topK": 3,
+  "results": [
+    {
+      "chunkId": "recife-attraction-instituto-ricardo-brennand-chunk-1",
+      "docId": "recife-attraction-instituto-ricardo-brennand",
+      "city": "Recife",
+      "title": "Instituto Ricardo Brennand",
+      "category": "attraction",
+      "region": "Varzea",
+      "summary": "Complexo cultural com museu, pinacoteca e area externa ampla.",
+      "snippet": "Complexo cultural com museu...",
+      "tags": ["museu", "arte", "historia"],
+      "source": "manual:recife-v1",
+      "updatedAt": "2026-03-20",
+      "score": 1
+    }
+  ]
+}
+```
+
+Consolidacao conversa + retrieval grounded:
+- `assistantMessage`: texto resumido da resposta do assistente
+- `nextQuestion`: somente quando ha pergunta real de slot/esclarecimento
+- `groundedSuggestions`: sugestoes estruturadas e grounded por cidade
+
+Exemplo (`o que vale visitar em Recife?`):
+
+```json
+{
+  "tripState": { "destination": "Recife", "stops": [], "savedPlacesByCity": [], "preferences": { "likes": [], "dislikes": [] } },
+  "assistantMessage": "Sugestoes grounded em Recife: 1. Instituto Ricardo Brennand (Varzea) | 2. Cais do Sertao (Recife Antigo) | 3. Recife Antigo (Centro).",
+  "groundedSuggestions": {
+    "city": "Recife",
+    "query": "o que vale visitar em Recife?",
+    "topK": 3,
+    "items": [
+      {
+        "rank": 1,
+        "city": "Recife",
+        "region": "Varzea",
+        "title": "Instituto Ricardo Brennand",
+        "category": "attraction",
+        "summary": "Complexo cultural com museu, pinacoteca e area externa ampla.",
+        "source": "manual:recife-v1",
+        "score": 1,
+        "docId": "recife-attraction-instituto-ricardo-brennand",
+        "chunkId": "recife-attraction-instituto-ricardo-brennand-chunk-1"
+      }
+    ]
+  }
+}
+```
+
+Exemplo (`me sugere cafes em Boa Viagem`):
+- mapeia `city=Recife` e `regionHint=Boa Viagem` para melhorar ranking.
+
+Exemplo (`salva a primeira opcao`):
+- usa `tripState.conversationMeta.lastSuggestions` recente
+- salva em `savedPlacesByCity` com `source: "retrieval"`.
+
+Exemplo (`me mostra o que eu salvei em Recife`):
+- retorna listagem em `assistantMessage`.
+
+Quando retrieval nao encontra resultado:
+- resposta segura em `assistantMessage`
+- sem invencao de lugares.
+
+Logs de debug (`CONVERSATION_UPDATE_DEBUG=true`):
+- `retrieval_triggered`
+- `retrieval_skipped_no_city`
+- `retrieval_empty`
+- `retrieval_suggestions_returned`
+- `saved_from_suggestion`
+
+Checklist operacional (conversa + retrieval):
+- [x] retrieval acionado por intencao explicita de sugestao
+- [x] `assistantMessage` separado de `nextQuestion`
+- [x] `groundedSuggestions` estruturado no response
+- [x] mapeamento `Boa Viagem -> city Recife + regionHint Boa Viagem`
+- [x] `salva a primeira opcao` a partir de sugestoes recentes
+- [x] stale guard via `conversationMeta.lastSuggestionsAt`
+- [x] fallback seguro sem invencao quando retrieval vazio
 
 Exemplo sem `daysTotal` (rota inicial ainda assim):
 
@@ -132,9 +241,19 @@ curl -sS -X POST http://localhost:3001/conversation/update \
       { "city": "Recife", "role": "stop" },
       { "city": "Aracaju", "role": "destination" }
     ]
-  }
+  },
+  "tripLegs": [
+    { "fromCity": "Natal", "toCity": "Recife", "order": 1 },
+    { "fromCity": "Recife", "toCity": "Aracaju", "order": 2 }
+  ]
 }
 ```
+
+Visao por trecho (`tripLegs`):
+- derivada de `origin -> stops -> destination`
+- sem persistencia separada nesta fase
+- `order` acompanha a ordem da rota
+- `stayDaysAtDestination` aparece apenas quando explicito no destino do trecho
 
 Exemplo de update incremental de `stayDays`:
 
@@ -184,7 +303,13 @@ Melhorias de nextQuestion (slot-filling com prioridade):
 - metadado curto no estado:
   - `tripState.conversationMeta.lastAskedField`
   - `tripState.conversationMeta.askedFieldsRecent`
-  - `tripState.conversationMeta.lastUserTurn`
+  - `tripState.conversationMeta.lastResolvedField`
+  - `tripState.conversationMeta.lastUserMessage`
+  - `tripState.conversationMeta.conversationStage`
+  - `tripState.conversationMeta.unresolvedFields`
+  - `tripState.conversationMeta.confidenceByField` (opcional)
+  - `tripState.conversationMeta.currentFocusCity`
+  - `tripState.conversationMeta.currentFocusField`
 
 Exemplo antes/depois (resumo):
 - antes:
@@ -197,6 +322,75 @@ Exemplo antes/depois (resumo):
   - bot: pode registrar progresso sem perguntar imediatamente
   - user: `Natal`
   - bot: nao repete origem, segue para gap mais util quando necessario
+
+Correcao de slot `daysTotal` (turno contextual):
+- quando a pergunta anterior foi `Quantos dias...`, respostas diretas agora tem prioridade:
+  - `7 dias`
+  - `vou passar 7 dias`
+  - `serao 5 dias`
+- o valor e persistido em `tripState.daysTotal`
+- `nextQuestion` e recalculada apos o merge final e nao repete `daysTotal` se o slot foi preenchido
+
+Resolucao contextual de lugar (minima):
+- referencias como `la`, `ali`, `nesse destino`, `nessa parada` usam foco atual da conversa
+- fallback de foco:
+  - stop em foco (se houver stop recente)
+  - destino atual (quando nao houver stop ativo)
+- exemplos:
+  - `quero viajar de Sao Vicente para Sao Miguel` -> cidades limpas
+  - depois: `pretendo passar 4 dias la` -> aplica no destino/foco atual
+  - `quero ficar 2 dias nessa parada` -> aplica no stop em foco quando houver
+
+Nucleo conversacional (pipeline modular):
+- `extractConversationSignals`
+- `normalizeEntities`
+- `resolveContextualReferences`
+- `mergeTripState`
+- `decideNextAction`
+
+Regra operacional:
+- `nextQuestion` e decidida somente apos o merge final do estado
+- logs por etapa disponiveis com `CONVERSATION_UPDATE_DEBUG=true`
+
+Lugares salvos por cidade (`savedPlacesByCity`):
+- estado agora guarda lugares salvos por cidade no proprio `TripState`
+- estrutura minima por item:
+  - `placeName`
+  - `note` (opcional)
+  - `source: "user"`
+
+Exemplos:
+
+```bash
+curl -sS -X POST http://localhost:3001/conversation/update \
+  -H 'content-type: application/json' \
+  -d '{"message":"quero salvar o Mercado de Sao Jose em Recife","tripState":{"origin":"Natal","destination":"Recife","stops":[],"savedPlacesByCity":[],"preferences":{"likes":[],"dislikes":[]}}}'
+```
+
+```bash
+curl -sS -X POST http://localhost:3001/conversation/update \
+  -H 'content-type: application/json' \
+  -d '{"message":"adiciona o Instituto Ricardo Brennand no roteiro","tripState":{"origin":"Natal","destination":"Recife","stops":[],"savedPlacesByCity":[],"preferences":{"likes":[],"dislikes":[]},"conversationMeta":{"currentFocusCity":"Recife","currentFocusField":"destination"}}}'
+```
+
+```bash
+curl -sS -X POST http://localhost:3001/conversation/update \
+  -H 'content-type: application/json' \
+  -d '{"message":"remove o Mercado de Sao Jose da minha lista","tripState":{"origin":"Natal","destination":"Recife","stops":[],"savedPlacesByCity":[{"city":"Recife","places":[{"placeName":"Mercado de Sao Jose","source":"user"},{"placeName":"Instituto Ricardo Brennand","source":"user"}]}],"preferences":{"likes":[],"dislikes":[]},"conversationMeta":{"currentFocusCity":"Recife","currentFocusField":"destination"}}}'
+```
+
+```bash
+curl -sS -X POST http://localhost:3001/conversation/update \
+  -H 'content-type: application/json' \
+  -d '{"message":"quais lugares eu salvei em Recife?","tripState":{"origin":"Natal","destination":"Recife","stops":[],"savedPlacesByCity":[{"city":"Recife","places":[{"placeName":"Instituto Ricardo Brennand","source":"user"}]}],"preferences":{"likes":[],"dislikes":[]},"conversationMeta":{"currentFocusCity":"Recife","currentFocusField":"destination"}}}'
+```
+
+Quando faltar cidade/contexto suficiente para salvar/remover:
+- API retorna `nextQuestion` pedindo cidade: `Em qual cidade fica esse lugar?`
+
+Quando pedir listagem com cidade resolvida:
+- API retorna a resposta textual no `nextQuestion`:
+  - `Lugares salvos em Recife: Instituto Ricardo Brennand.`
 
 Extracao estruturada com LLM (opcional):
 - quando `CONVERSATION_LLM_ENABLED=true`, a LLM vira caminho principal de extracao estruturada

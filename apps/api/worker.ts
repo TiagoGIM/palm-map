@@ -1,5 +1,6 @@
 import { handleConversationUpdate } from './conversation-update'
 import { handlePlanTrip } from './plan-trip'
+import { handleRetrieve } from './retrieve'
 
 type WorkerEnv = {
   APP_ENV?: string
@@ -42,10 +43,12 @@ export default {
     const isConversationUpdateRoute =
       url.pathname === '/conversation/update' ||
       url.pathname === '/api/conversation/update'
+    const isRetrieveRoute =
+      url.pathname === '/retrieve' || url.pathname === '/api/retrieve'
 
     if (
       request.method !== 'POST' ||
-      (!isPlanTripRoute && !isConversationUpdateRoute)
+      (!isPlanTripRoute && !isConversationUpdateRoute && !isRetrieveRoute)
     ) {
       return jsonResponse(
         {
@@ -75,7 +78,9 @@ export default {
 
     const response = isConversationUpdateRoute
       ? await handleConversationUpdate(requestBody, env)
-      : handlePlanTrip(requestBody)
+      : isRetrieveRoute
+        ? handleRetrieve(requestBody)
+        : handlePlanTrip(requestBody)
 
     return jsonResponse(response.body, response.status, corsHeaders)
   },

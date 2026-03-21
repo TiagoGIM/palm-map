@@ -1,7 +1,11 @@
 import type { KeyboardEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 
-import type { SuggestedRoute, TripState } from '../../packages/shared-types'
+import type {
+  GroundedSuggestions,
+  SuggestedRoute,
+  TripState,
+} from '../../packages/shared-types'
 import { requestConversationUpdate } from './conversation-update-api'
 import { AppBar } from './ui/navigation/AppBar'
 import { Button } from './ui/primitives/Button'
@@ -13,6 +17,7 @@ type ConversationMessage = {
   text: string
   nextQuestion?: string
   suggestedRoute?: SuggestedRoute
+  groundedSuggestions?: GroundedSuggestions
 }
 
 export function App() {
@@ -37,8 +42,8 @@ export function App() {
     feedScrollRef.current.scrollTop = feedScrollRef.current.scrollHeight
   }, [messages, isSubmitting])
 
-  async function handleSubmit() {
-    const message = draftMessage.trim()
+  async function handleSubmit(rawMessage?: string) {
+    const message = (rawMessage ?? draftMessage).trim()
     if (!message || isSubmitting) {
       return
     }
@@ -49,7 +54,9 @@ export function App() {
       text: message,
     }
 
-    setDraftMessage('')
+    if (!rawMessage) {
+      setDraftMessage('')
+    }
     setMessages((current) => [...current, userMessage])
     setIsSubmitting(true)
     setError(null)
@@ -66,9 +73,10 @@ export function App() {
         {
           id: `system-${Date.now()}`,
           role: 'system',
-          text: buildSystemText(result.tripState),
+          text: result.assistantMessage ?? buildSystemText(result.tripState),
           nextQuestion: result.nextQuestion,
           suggestedRoute: result.suggestedRoute,
+          groundedSuggestions: result.groundedSuggestions,
         },
       ])
     } catch (caughtError) {
@@ -80,6 +88,11 @@ export function App() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  async function handleSaveSuggestionOption(rank: number) {
+    const command = `salva a ${rank} opcao`
+    await handleSubmit(command)
   }
 
   function handleDraftKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
@@ -127,6 +140,38 @@ export function App() {
                 </ul>
               </section>
             ) : null}
+
+            {message.groundedSuggestions ? (
+              <section aria-label="Sugestoes grounded" className="grounded-box">
+                <p className="route-title">
+                  Sugestoes em {message.groundedSuggestions.city}
+                  {message.groundedSuggestions.regionHint
+                    ? ` - ${message.groundedSuggestions.regionHint}`
+                    : ''}
+                </p>
+                <ul className="grounded-list">
+                  {message.groundedSuggestions.items.map((item) => (
+                    <li key={`${message.id}-${item.chunkId}`} className="grounded-item">
+                      <p className="grounded-item-title">
+                        {item.rank}. {item.title}
+                      </p>
+                      <p className="grounded-item-meta">
+                        {item.category} • {item.region} • score {item.score}
+                      </p>
+                      <p className="grounded-item-summary">{item.summary}</p>
+                      <Button
+                        variant="tonal"
+                        className="grounded-save-button"
+                        disabled={isSubmitting}
+                        onClick={() => void handleSaveSuggestionOption(item.rank)}
+                      >
+                        Salvar opcao {item.rank}
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
           </Card>
         ))}
       </section>
@@ -145,7 +190,10 @@ export function App() {
             />
           </label>
 
-          <Button disabled={isSubmitting || draftMessage.trim() === ''} onClick={handleSubmit}>
+          <Button
+            disabled={isSubmitting || draftMessage.trim() === ''}
+            onClick={() => void handleSubmit()}
+          >
             {isSubmitting ? 'Enviando...' : 'Enviar'}
           </Button>
         </div>

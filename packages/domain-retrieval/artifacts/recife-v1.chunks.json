@@ -1,0 +1,164 @@
+[
+  {
+    "chunkId": "recife-attraction-marco-zero-chunk-1",
+    "docId": "recife-attraction-marco-zero",
+    "city": "Recife",
+    "title": "Marco Zero",
+    "category": "attraction",
+    "region": "Recife Antigo",
+    "summary": "Praca historica e ponto de partida comum para visitar o centro antigo.",
+    "content": "O Marco Zero fica na Praca Rio Branco, no bairro do Recife Antigo. O local concentra movimento de visitantes, feiras sazonais e acesso facil para caminhar pela area historica e pelos armazens culturais proximos.",
+    "snippet": "Praca historica e ponto de partida comum para visitar o centro antigo. O Marco Zero fica na Praca Rio Branco, no bairro do Recife Antigo. O local concentra movimento de visitantes, feiras sazonais e acesso facil para caminhar pela area historica e pelos armazens culturais proximos.",
+    "tags": [
+      "centro historico",
+      "recife antigo",
+      "passeio a pe"
+    ],
+    "source": "manual:recife-v1",
+    "updatedAt": "2026-03-20"
+  },
+  {
+    "chunkId": "recife-attraction-cais-do-sertao-chunk-1",
+    "docId": "recife-attraction-cais-do-sertao",
+    "city": "Recife",
+    "title": "Cais do Sertao",
+    "category": "attraction",
+    "region": "Recife Antigo",
+    "summary": "Museu interativo focado na cultura nordestina e no universo de Luiz Gonzaga.",
+    "content": "O Cais do Sertao oferece exposicoes interativas, recursos audiovisuais e experiencias sobre musica, territorio e cotidiano do sertao. Fica em area central do Recife Antigo e costuma ser combinado com outros pontos do bairro.",
+    "snippet": "Museu interativo focado na cultura nordestina e no universo de Luiz Gonzaga. O Cais do Sertao oferece exposicoes interativas, recursos audiovisuais e experiencias sobre musica, territorio e cotidiano do sertao. Fica em area central do Recife Antigo e costuma ser combinado com outros pontos do bairro.",
+    "tags": [
+      "museu",
+      "cultura",
+      "interativo"
+    ],
+    "source": "manual:recife-v1",
+    "updatedAt": "2026-03-20"
+  },
+  {
+    "chunkId": "recife-attraction-instituto-ricardo-brennand-chunk-1",
+    "docId": "recife-attraction-instituto-ricardo-brennand",
+    "city": "Recife",
+    "title": "Instituto Ricardo Brennand",
+    "category": "attraction",
+    "region": "Varzea",
+    "summary": "Complexo cultural com museu, pinacoteca e area externa ampla.",
+    "content": "O Instituto Ricardo Brennand reune colecoes de arte, biblioteca e um conjunto arquitetonico inspirado em castelo. O deslocamento ate a Varzea costuma demandar mais tempo em comparacao com atracoes centrais.",
+    "snippet": "Complexo cultural com museu, pinacoteca e area externa ampla. O Instituto Ricardo Brennand reune colecoes de arte, biblioteca e um conjunto arquitetonico inspirado em castelo. O deslocamento ate a Varzea costuma demandar mais tempo em comparacao com atracoes centrais.",
+    "tags": [
+      "museu",
+      "arte",
+      "historia"
+    ],
+    "source": "manual:recife-v1",
+    "updatedAt": "2026-03-20"
+  },
+  {
+    "chunkId": "recife-neighborhood-recife-antigo-chunk-1",
+    "docId": "recife-neighborhood-recife-antigo",
+    "city": "Recife",
+    "title": "Recife Antigo",
+    "category": "neighborhood",
+    "region": "Centro",
+    "summary": "Area com concentracao de museus, praca historica e polos culturais.",
+    "content": "Recife Antigo concentra pontos como Marco Zero, Paco do Frevo e Cais do Sertao. Para quem quer otimizar deslocamentos, vale reservar um periodo continuo para explorar o bairro a pe e reduzir trocas de transporte.",
+    "snippet": "Area com concentracao de museus, praca historica e polos culturais. Recife Antigo concentra pontos como Marco Zero, Paco do Frevo e Cais do Sertao. Para quem quer otimizar deslocamentos, vale reservar um periodo continuo para explorar o bairro a pe e reduzir trocas de transporte.",
+    "tags": [
+      "bairro",
+      "centro",
+      "museus"
+    ],
+    "source": "manual:recife-v1",
+    "updatedAt": "2026-03-20"
+  },
+  {
+    "chunkId": "recife-neighborhood-boa-viagem-chunk-1",
+    "docId": "recife-neighborhood-boa-viagem",
+    "city": "Recife",
+    "title": "Boa Viagem",
+    "category": "neighborhood",
+    "region": "Zona Sul",
+    "summary": "Area com praia urbana, calcadao e alta oferta de servicos.",
+    "content": "Boa Viagem combina praia urbana com rede de restaurantes, hospedagem e comercio. E comum usar o bairro como base logistica por causa da oferta de transporte e da proximidade com o aeroporto.",
+    "snippet": "Area com praia urbana, calcadao e alta oferta de servicos. Boa Viagem combina praia urbana com rede de restaurantes, hospedagem e comercio. E comum usar o bairro como base logistica por causa da oferta de transporte e da proximidade com o aeroporto.",
+    "tags": [
+      "praia",
+      "zona sul",
+      "hospedagem"
+    ],
+    "source": "manual:recife-v1",
+    "updatedAt": "2026-03-20"
+  },
+  {
+    "chunkId": "recife-food-cafe-oficina-do-sabor-chunk-1",
+    "docId": "recife-food-cafe-oficina-do-sabor",
+    "city": "Recife",
+    "title": "Oficina do Sabor",
+    "category": "food_cafe",
+    "region": "Alto da Se",
+    "summary": "Restaurante conhecido em Olinda e frequentemente incluIdo em bate-volta saindo do Recife.",
+    "content": "A Oficina do Sabor fica em Olinda, proximo ao Alto da Se, e aparece em roteiros gastronomicos combinados com passeio historico. Para quem esta hospedado no Recife, vale considerar tempo de deslocamento para ida e volta.",
+    "snippet": "Restaurante conhecido em Olinda e frequentemente incluIdo em bate-volta saindo do Recife. A Oficina do Sabor fica em Olinda, proximo ao Alto da Se, e aparece em roteiros gastronomicos combinados com passeio historico. Para quem esta hospedado no Recife, vale considerar tempo de deslocamento para ida e volta.",
+    "tags": [
+      "gastronomia",
+      "olinda",
+      "bate-volta"
+    ],
+    "source": "manual:recife-v1",
+    "updatedAt": "2026-03-20"
+  },
+  {
+    "chunkId": "recife-food-cafe-cafe-jaqueira-chunk-1",
+    "docId": "recife-food-cafe-cafe-jaqueira",
+    "city": "Recife",
+    "title": "Cafe na Jaqueira",
+    "category": "food_cafe",
+    "region": "Jaqueira",
+    "summary": "Opcao de cafe e lanche em area residencial com movimento diurno.",
+    "content": "A regiao da Jaqueira oferece cafes e padarias para pausas de meio de tarde. Pode ser uma boa alternativa para um ritmo mais tranquilo entre atividades mais longas do dia.",
+    "snippet": "Opcao de cafe e lanche em area residencial com movimento diurno. A regiao da Jaqueira oferece cafes e padarias para pausas de meio de tarde. Pode ser uma boa alternativa para um ritmo mais tranquilo entre atividades mais longas do dia.",
+    "tags": [
+      "cafe",
+      "lanche",
+      "ritmo tranquilo"
+    ],
+    "source": "manual:recife-v1",
+    "updatedAt": "2026-03-20"
+  },
+  {
+    "chunkId": "recife-logistics-airport-boa-viagem-chunk-1",
+    "docId": "recife-logistics-airport-boa-viagem",
+    "city": "Recife",
+    "title": "Acesso aeroporto e Boa Viagem",
+    "category": "logistics",
+    "region": "Zona Sul",
+    "summary": "Boa Viagem costuma reduzir tempo de deslocamento de chegada e saida.",
+    "content": "Para chegadas e partidas com pouco intervalo, ficar em Boa Viagem tende a simplificar a logistica pelo acesso mais direto ao aeroporto. Em dias com agenda apertada, isso pode reduzir risco de atraso.",
+    "snippet": "Boa Viagem costuma reduzir tempo de deslocamento de chegada e saida. Para chegadas e partidas com pouco intervalo, ficar em Boa Viagem tende a simplificar a logistica pelo acesso mais direto ao aeroporto. Em dias com agenda apertada, isso pode reduzir risco de atraso.",
+    "tags": [
+      "aeroporto",
+      "deslocamento",
+      "logistica"
+    ],
+    "source": "manual:recife-v1",
+    "updatedAt": "2026-03-20"
+  },
+  {
+    "chunkId": "recife-logistics-praia-boa-viagem-cuidados-chunk-1",
+    "docId": "recife-logistics-praia-boa-viagem-cuidados",
+    "city": "Recife",
+    "title": "Cuidados na praia de Boa Viagem",
+    "category": "logistics",
+    "region": "Boa Viagem",
+    "summary": "Orientacoes praticas para banho e uso da faixa de areia.",
+    "content": "Ao planejar tempo de praia em Boa Viagem, consulte sinalizacao local e orientacoes publicas sobre trechos recomendados para banho. Em planejamento de roteiro, registre essa etapa como atividade com cuidado adicional.",
+    "snippet": "Orientacoes praticas para banho e uso da faixa de areia. Ao planejar tempo de praia em Boa Viagem, consulte sinalizacao local e orientacoes publicas sobre trechos recomendados para banho. Em planejamento de roteiro, registre essa etapa como atividade com cuidado adicional.",
+    "tags": [
+      "praia",
+      "seguranca",
+      "cuidados"
+    ],
+    "source": "manual:recife-v1",
+    "updatedAt": "2026-03-20"
+  }
+]

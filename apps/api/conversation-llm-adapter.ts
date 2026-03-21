@@ -362,7 +362,7 @@ function normalizeOptionalPlace(value: unknown): string | undefined {
     return undefined
   }
 
-  const compact = value
+  const compactBase = value
     .replace(/\s+/g, ' ')
     .trim()
     .replace(/^praia\s+de\s+/i, '')
@@ -373,6 +373,8 @@ function normalizeOptionalPlace(value: unknown): string | undefined {
     .replace(/\s+no\s+caminho.*$/i, '')
     .replace(/[.,;:!?]+$/g, '')
     .trim()
+
+  const compact = stripPlaceTailNoise(compactBase)
   if (!compact) {
     return undefined
   }
@@ -391,6 +393,33 @@ function normalizeOptionalPlace(value: unknown): string | undefined {
       return lowerPart[0].toUpperCase() + lowerPart.slice(1)
     })
     .join(' ')
+}
+
+function stripPlaceTailNoise(value: string): string {
+  const noiseTokens = new Set([
+    'vou',
+    'quero',
+    'pretendo',
+    'passar',
+    'ficar',
+    'seguir',
+    'viajar',
+    'serao',
+    'serão',
+    'sera',
+    'será',
+  ])
+
+  const parts = value.split(' ').filter(Boolean)
+  while (parts.length > 1) {
+    const tail = parts[parts.length - 1]?.toLowerCase()
+    if (!tail || !noiseTokens.has(tail)) {
+      break
+    }
+    parts.pop()
+  }
+
+  return parts.join(' ').trim()
 }
 
 function normalizeOptionalText(value: unknown): string | undefined {
