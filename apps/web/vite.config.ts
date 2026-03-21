@@ -4,8 +4,13 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
+    strictPort: true,
     hmr: {
       overlay: true,
+    },
+    watch: {
+      usePolling: true,
+      interval: 120,
     },
     proxy: {
       '/api': {

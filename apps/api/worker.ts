@@ -1,3 +1,4 @@
+import { handleConversationUpdate } from './conversation-update'
 import { handlePlanTrip } from './plan-trip'
 
 type WorkerEnv = {
@@ -5,6 +6,14 @@ type WorkerEnv = {
   API_ALLOWED_ORIGIN?: string
   D1_BINDING_NAME?: string
   VECTORIZE_BINDING_NAME?: string
+  CONVERSATION_LLM_ENABLED?: string
+  CONVERSATION_LLM_API_KEY?: string
+  CONVERSATION_LLM_BASE_URL?: string
+  CONVERSATION_LLM_MODEL?: string
+  CONVERSATION_LLM_TIMEOUT_MS?: string
+  CONVERSATION_LLM_DEBUG?: string
+  CONVERSATION_LLM_MIN_CONFIDENCE?: string
+  CONVERSATION_UPDATE_DEBUG?: string
 }
 
 const CORS_HEADERS = {
@@ -30,8 +39,14 @@ export default {
     const url = new URL(request.url)
     const isPlanTripRoute =
       url.pathname === '/plan-trip' || url.pathname === '/api/plan-trip'
+    const isConversationUpdateRoute =
+      url.pathname === '/conversation/update' ||
+      url.pathname === '/api/conversation/update'
 
-    if (!isPlanTripRoute || request.method !== 'POST') {
+    if (
+      request.method !== 'POST' ||
+      (!isPlanTripRoute && !isConversationUpdateRoute)
+    ) {
       return jsonResponse(
         {
           error: {
@@ -58,7 +73,10 @@ export default {
       )
     }
 
-    const response = handlePlanTrip(requestBody)
+    const response = isConversationUpdateRoute
+      ? await handleConversationUpdate(requestBody, env)
+      : handlePlanTrip(requestBody)
+
     return jsonResponse(response.body, response.status, corsHeaders)
   },
 }

@@ -8,6 +8,13 @@ API_ALLOWED_ORIGIN = "*"
 # Placeholder names for future data bindings
 D1_BINDING_NAME = "PALM_MAP_DB"
 VECTORIZE_BINDING_NAME = "PALM_MAP_INDEX"
+CONVERSATION_LLM_ENABLED = "false"
+CONVERSATION_LLM_BASE_URL = "https://api.openai.com/v1"
+CONVERSATION_LLM_MODEL = "gpt-4.1-mini"
+CONVERSATION_LLM_TIMEOUT_MS = "5000"
+CONVERSATION_LLM_DEBUG = "false"
+CONVERSATION_LLM_MIN_CONFIDENCE = "0.45"
+CONVERSATION_UPDATE_DEBUG = "false"
 
 [env.staging]
 name = "palm-map-api-staging"
@@ -18,6 +25,13 @@ API_ALLOWED_ORIGIN = "*"
 # Keep placeholders explicit for staged rollout.
 D1_BINDING_NAME = "PALM_MAP_DB"
 VECTORIZE_BINDING_NAME = "PALM_MAP_INDEX"
+CONVERSATION_LLM_ENABLED = "false"
+CONVERSATION_LLM_BASE_URL = "https://api.openai.com/v1"
+CONVERSATION_LLM_MODEL = "gpt-4.1-mini"
+CONVERSATION_LLM_TIMEOUT_MS = "5000"
+CONVERSATION_LLM_DEBUG = "false"
+CONVERSATION_LLM_MIN_CONFIDENCE = "0.45"
+CONVERSATION_UPDATE_DEBUG = "false"
 
 # Future bindings (enable when resources exist):
 # [[env.staging.d1_databases]]

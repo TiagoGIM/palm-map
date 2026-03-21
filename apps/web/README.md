@@ -19,7 +19,8 @@ Dependencias esperadas:
 
 Estrutura minima atual:
 - `main.tsx`: ponto de entrada da app web e montagem do shell no `#root`
-- `app.tsx`: shell pequeno do fluxo `plan-trip`, com formulario, submit e estados basicos
+- `app.tsx`: shell conversacional minimo com mensagens, input livre e estado local de `TripState`
+- `conversation-update-api.ts`: chamada HTTP para `POST /api/conversation/update`
 - `plan-trip-api.ts`: chamada HTTP para `POST /api/plan-trip`
 - `plan-trip-result.tsx`: renderizacao do resultado retornado pela API
 - `index.html`: host minimo da app no navegador com `<div id="root">`
@@ -37,7 +38,7 @@ Estrutura minima atual:
 
 Como evoluir:
 - tarefas de entrada e estado do fluxo devem partir de `app.tsx`
-- tarefas de integracao HTTP devem reutilizar `plan-trip-api.ts`
+- tarefas de integracao HTTP devem reutilizar `conversation-update-api.ts`
 - tarefas de exibicao do roteiro devem ajustar `plan-trip-result.tsx`
 - a UI deve continuar refletindo diretamente os dados da API, sem inferencias locais de negocio
 
@@ -48,10 +49,25 @@ Como rodar localmente:
 4. abrir `http://localhost:5173`
 
 Notas de execucao:
-- sem `VITE_API_BASE_URL`, a UI usa `/api/plan-trip`
+- sem `VITE_API_BASE_URL`, a UI usa `/api/conversation/update` (e `/api/plan-trip` segue disponivel)
 - no modo dev, o Vite faz proxy de `/api` para `http://localhost:3001`
-- com `VITE_API_BASE_URL`, a UI chama `${VITE_API_BASE_URL}/plan-trip`
+- com `VITE_API_BASE_URL`, a UI chama `${VITE_API_BASE_URL}/conversation/update`
 - hot reload (HMR) ativo no `pnpm dev` para alteracoes de componentes/estilos
+- o `vite.config.ts` usa polling (`server.watch.usePolling=true`) para evitar falhas de reload em alguns ambientes
+
+Validacao rapida do fluxo conversacional:
+1. subir API local: `pnpm --dir apps/api dev`
+2. subir web: `pnpm --dir apps/web dev`
+3. abrir `http://localhost:5173`
+4. enviar mensagens como:
+   - `Quero viajar de Natal para Aracaju por 8 dias`
+   - `Passar por Recife`
+   - `Quero ficar 2 dias em Maceio`
+5. confirmar na UI:
+   - mensagem do usuario
+   - resposta textual do sistema
+   - `nextQuestion` quando faltar dado
+   - `suggestedRoute` quando vier da API
 
 Staging (Cloudflare Pages):
 - build/deploy do web preparado para Pages

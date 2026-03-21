@@ -89,6 +89,65 @@ body {
   gap: var(--space-3);
 }
 
+.conversation-feed {
+  display: grid;
+  gap: var(--space-3);
+  max-height: min(62vh, 560px);
+  overflow-y: auto;
+  padding-right: 4px;
+  scroll-behavior: smooth;
+}
+
+.message-card-user {
+  margin-left: var(--space-6);
+  background: rgb(var(--color-primary) / 0.08);
+}
+
+.message-card-system {
+  margin-right: var(--space-6);
+}
+
+.message-role {
+  margin: 0 0 4px;
+  font-size: var(--font-size-xs);
+  color: rgb(var(--color-on-muted));
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.message-text {
+  margin: 0;
+}
+
+.next-question {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-sm);
+  color: rgb(var(--color-primary));
+  font-weight: 600;
+}
+
+.route-box {
+  margin-top: var(--space-2);
+  border: 1px solid rgb(var(--color-outline));
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+  background: rgb(var(--color-surface));
+}
+
+.route-title {
+  margin: 0 0 6px;
+  font-size: var(--font-size-sm);
+  color: rgb(var(--color-on-muted));
+}
+
+.route-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+  font-size: var(--font-size-sm);
+}
+
 .effective-pref-note {
   margin: 0;
   font-size: var(--font-size-sm);
