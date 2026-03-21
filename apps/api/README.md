@@ -27,7 +27,15 @@ Proximos arquivos importantes:
 - camada de orquestracao do MVP
 
 Arquivos atuais:
-- `conversation-update.ts`
+- `conversation-update.ts` — handler público + pipeline de orquestração (entry point)
+- `conversation-types.ts` — tipos internos e constantes do fluxo conversacional
+- `conversation-city-utils.ts` — normalização de nomes de cidades (compartilhada)
+- `conversation-extract.ts` — extração de sinais da mensagem (heurístico + mapeamento LLM)
+- `conversation-merge.ts` — criação do estado base e merge de estado + sinais
+- `conversation-decide.ts` — decisão de próxima ação, construção de meta e builders de resposta
+- `conversation-retrieve.ts` — resolução de sugestões grounded via retrieval
+- `conversation-logging.ts` — debug logging e utilitários de summarize
+- `conversation-llm-adapter.ts` — integração com LLM externo (OpenAI-compatible)
 - `conversation-llm-adapter.ts`
 - `plan-trip.ts`
 - `index.ts`

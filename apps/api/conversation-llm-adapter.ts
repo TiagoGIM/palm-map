@@ -1,4 +1,5 @@
 import type { TripState } from '../../packages/shared-types'
+import { normalizeCity } from './conversation-city-utils'
 
 export type ConversationLlmEnv = {
   CONVERSATION_LLM_ENABLED?: string
@@ -361,65 +362,8 @@ function normalizeOptionalPlace(value: unknown): string | undefined {
   if (typeof value !== 'string') {
     return undefined
   }
-
-  const compactBase = value
-    .replace(/\s+/g, ' ')
-    .trim()
-    .replace(/^praia\s+de\s+/i, '')
-    .replace(/\s*\/\s*[a-z]{2}\b.*$/i, '')
-    .replace(/\s*-\s*[a-z]{2}\b.*$/i, '')
-    .replace(/\s+e\s+seguir.*$/i, '')
-    .replace(/\s+e\s+depois.*$/i, '')
-    .replace(/\s+no\s+caminho.*$/i, '')
-    .replace(/[.,;:!?]+$/g, '')
-    .trim()
-
-  const compact = stripPlaceTailNoise(compactBase)
-  if (!compact) {
-    return undefined
-  }
-
-  return compact
-    .split(' ')
-    .map((part, index) => {
-      const lowerPart = part.toLowerCase()
-      if (
-        index > 0 &&
-        ['de', 'da', 'do', 'das', 'dos', 'e'].includes(lowerPart)
-      ) {
-        return lowerPart
-      }
-
-      return lowerPart[0].toUpperCase() + lowerPart.slice(1)
-    })
-    .join(' ')
-}
-
-function stripPlaceTailNoise(value: string): string {
-  const noiseTokens = new Set([
-    'vou',
-    'quero',
-    'pretendo',
-    'passar',
-    'ficar',
-    'seguir',
-    'viajar',
-    'serao',
-    'serão',
-    'sera',
-    'será',
-  ])
-
-  const parts = value.split(' ').filter(Boolean)
-  while (parts.length > 1) {
-    const tail = parts[parts.length - 1]?.toLowerCase()
-    if (!tail || !noiseTokens.has(tail)) {
-      break
-    }
-    parts.pop()
-  }
-
-  return parts.join(' ').trim()
+  const result = normalizeCity(value)
+  return result || undefined
 }
 
 function normalizeOptionalText(value: unknown): string | undefined {
