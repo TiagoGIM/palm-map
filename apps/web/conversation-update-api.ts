@@ -32,10 +32,25 @@ export async function requestConversationUpdate(
 }
 
 function resolveConversationUpdateUrl(): string {
-  if (!ENV_API_BASE_URL) {
+  if (ENV_API_BASE_URL) {
+    const normalizedBase = ENV_API_BASE_URL.replace(/\/+$/, '')
+    return `${normalizedBase}/conversation/update`
+  }
+
+  if (isLocalWebEnvironment()) {
     return '/api/conversation/update'
   }
 
-  const normalizedBase = ENV_API_BASE_URL.replace(/\/+$/, '')
-  return `${normalizedBase}/conversation/update`
+  throw new Error(
+    'VITE_API_BASE_URL nao configurado para ambiente publicado. Defina a URL publica da API no build do frontend.',
+  )
+}
+
+function isLocalWebEnvironment(): boolean {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  const hostname = window.location.hostname
+  return hostname === 'localhost' || hostname === '127.0.0.1'
 }

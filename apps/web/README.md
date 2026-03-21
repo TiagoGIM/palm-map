@@ -52,6 +52,7 @@ Notas de execucao:
 - sem `VITE_API_BASE_URL`, a UI usa `/api/conversation/update` (e `/api/plan-trip` segue disponivel)
 - no modo dev, o Vite faz proxy de `/api` para `http://localhost:3001`
 - com `VITE_API_BASE_URL`, a UI chama `${VITE_API_BASE_URL}/conversation/update`
+- em ambiente publicado (Pages/staging/producao), `VITE_API_BASE_URL` e obrigatoria; sem ela, o app falha cedo para evitar chamadas erradas ao host estatico
 - hot reload (HMR) ativo no `pnpm dev` para alteracoes de componentes/estilos
 - o `vite.config.ts` usa polling (`server.watch.usePolling=true`) para evitar falhas de reload em alguns ambientes
 
@@ -73,6 +74,11 @@ Validacao rapida do fluxo conversacional:
 Staging (Cloudflare Pages):
 - build/deploy do web preparado para Pages
 - script local de deploy preview/staging: `pnpm --dir apps/web deploy:preview`
+- script seguro para staging publicado: `pnpm --dir apps/web deploy:staging`
+- o script de staging procura `VITE_API_BASE_URL` nesta ordem:
+  - env do shell
+  - `apps/web/.env.staging.local`
+  - `apps/web/.env.local`
 - workflow CI: `.github/workflows/deploy-staging-web.yml`
 
 Variavel publica de ambiente:
@@ -94,6 +100,11 @@ Como validar local e staging:
      - `CLOUDFLARE_PAGES_PROJECT_STAGING`
      - `STAGING_API_BASE_URL`
    - acionar workflow `Deploy Web Staging`
+4. Deploy staging manual:
+   - criar `apps/web/.env.staging.local` a partir de `apps/web/.env.staging.example`
+   - preencher `VITE_API_BASE_URL` com a URL publica do Worker de staging
+   - rodar `pnpm --dir apps/web deploy:staging`
+   - o script bloqueia o deploy se a env estiver ausente ou invalida
 
 Modelo de estilos inicial (MVP):
 - guideline visual: Material Design (principios), sem framework pesado de componentes
