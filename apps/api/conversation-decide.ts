@@ -271,6 +271,18 @@ export function buildConversationMeta(params: {
     extracted: params.extracted,
     nextState: params.nextState,
   })
+  const preferencesUpdatedThisTurn =
+    params.extracted.likes.length > 0 ||
+    params.extracted.dislikes.length > 0 ||
+    params.extracted.pace !== undefined ||
+    params.extracted.budget !== undefined
+  const hasPreferences =
+    params.nextState.preferences.likes.length > 0 ||
+    params.nextState.preferences.dislikes.length > 0 ||
+    params.nextState.preferences.pace !== undefined ||
+    params.nextState.preferences.budget !== undefined
+  const preferencesReused =
+    hasPreferences && !preferencesUpdatedThisTurn ? true : hasPreferences ? false : undefined
 
   return {
     lastAskedField: params.askedField,
@@ -299,6 +311,7 @@ export function buildConversationMeta(params: {
     lastSuggestionsAt:
       params.nextState.conversationMeta?.lastSuggestionsAt ??
       params.previousMeta?.lastSuggestionsAt,
+    preferencesReused,
   }
 }
 

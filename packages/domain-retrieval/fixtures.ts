@@ -46,3 +46,9 @@ export const placeFixturesByDestination: { recife: PlaceCandidate[] } = {
     },
   ],
 }
+
+const domainRetrievalModule = {
+  placeFixturesByDestination,
+}
+
+export default domainRetrievalModule

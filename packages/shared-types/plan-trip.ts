@@ -1,3 +1,5 @@
+import type { TripState } from './conversational-trip'
+
 /** Input accepted by the MVP plan-trip flow. */
 export type PlanTripInput = {
   /** City or place where the trip starts. */
@@ -8,6 +10,12 @@ export type PlanTripInput = {
   days: number
   /** Free-text preferences explicitly provided by the user. */
   preferencesText?: string
+  /**
+   * Optional conversational TripState that already holds grounded suggestions.
+   * When available, the planner will reuse those retrieval items instead of
+   * hitting the static fixtureset.
+   */
+  tripState?: TripState
 }
 
 /** Grounded place option returned by retrieval and reused by the planner. */

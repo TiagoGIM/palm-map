@@ -200,6 +200,138 @@ body {
   color: rgb(var(--color-on-muted));
 }
 
+.state-summary {
+  display: grid;
+  gap: var(--space-3);
+  background: rgb(var(--color-surface));
+  border: 1px solid rgb(var(--color-outline));
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  box-shadow: var(--elevation-1);
+}
+
+.state-card {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.state-card__label {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  color: rgb(var(--color-on-muted));
+  letter-spacing: 0.04em;
+}
+
+.state-card__value {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: rgb(var(--color-on-surface));
+}
+
+.state-card__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.state-chip {
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: rgb(var(--color-primary) / 0.08);
+  font-size: var(--font-size-xs);
+  color: rgb(var(--color-primary));
+}
+
+.state-chip--muted {
+  background: rgb(var(--color-outline));
+  color: rgb(var(--color-on-muted));
+}
+
+.state-card__meta {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: rgb(var(--color-on-muted));
+}
+
+.trip-legs-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.trip-leg {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+}
+
+.trip-leg__meta {
+  font-size: var(--font-size-xs);
+  color: rgb(var(--color-on-muted));
+}
+
+.state-card--stage {
+  border-top: 1px solid rgb(var(--color-outline) / 0.5);
+  padding-top: var(--space-2);
+}
+
+.plan-card {
+  padding-bottom: var(--space-2);
+}
+
+.plan-city-list {
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.plan-city-entry {
+  border: 1px solid rgb(var(--color-outline));
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+  background: rgb(var(--color-surface));
+}
+
+.plan-city-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  margin-bottom: var(--space-1);
+}
+
+.plan-city-role {
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgb(var(--color-on-muted));
+}
+
+.plan-city-name {
+  font-size: var(--font-size-sm);
+}
+
+.plan-city-stay {
+  font-size: var(--font-size-xs);
+  color: rgb(var(--color-on-muted));
+}
+
+.plan-city-saved {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: rgb(var(--color-on-surface));
+}
+
+.plan-city-saved--muted {
+  color: rgb(var(--color-on-muted));
+}
+
 .warnings-box {
   border: 1px solid rgb(var(--color-warning) / 0.35);
   border-radius: var(--radius-md);

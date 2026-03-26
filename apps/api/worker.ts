@@ -80,7 +80,7 @@ export default {
       ? await handleConversationUpdate(requestBody, env)
       : isRetrieveRoute
         ? handleRetrieve(requestBody)
-        : handlePlanTrip(requestBody)
+        : await handlePlanTrip(requestBody)
 
     return jsonResponse(response.body, response.status, corsHeaders)
   },

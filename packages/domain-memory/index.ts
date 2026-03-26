@@ -10,3 +10,9 @@ export function resolveEffectivePreferencesText(
 
   return storedPreferencesText
 }
+
+const domainMemoryModule = {
+  resolveEffectivePreferencesText,
+}
+
+export default domainMemoryModule

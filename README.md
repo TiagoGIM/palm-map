@@ -52,6 +52,13 @@ Se precisarmos fixar uma stack depois, uma composicao simples com web leve, API 
 - package manager padrao do repositorio: `pnpm`
 - para instalar dependencias e rodar scripts, prefira `pnpm` em vez de `npm`
 
+## Execução TypeScript local
+
+- O repositório compartilha `tsconfig.node.json` para scripts de Node; `apps/api/tsconfig.json` estende esse padrão.  
+- Execute validações TypeScript via `TS_NODE_PROJECT=tsconfig.json node --loader ts-node/esm --experimental-specifier-resolution=node` (ex.: `pnpm --dir apps/api test:plan-trip-validation`) para herdar `tsconfig.node.json` sem precisar de `.ts`.
+- Scripts que precisarem de paths relativos a `packages/*` devem obedecer à resolução `NodeNext`/`bundler` da tsconfig.  
+- Qualquer novo script TypeScript deve registrar o comando no `package.json` relevante e documentar a execução no runbook.
+
 ## Estrutura de Pastas
 
 ```text

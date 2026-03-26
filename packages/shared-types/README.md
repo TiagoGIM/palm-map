@@ -94,6 +94,7 @@ const tripState = {
     unresolvedFields: ['daysTotal'],
     currentFocusCity: 'Maceio',
     currentFocusField: 'destination',
+    preferencesReused: true,
     confidenceByField: {
       origin: 0.86,
       destination: 0.86,

@@ -80,6 +80,36 @@ curl -sS -X POST http://localhost:3001/plan-trip \
   -d '{"origin":"Fortaleza","destination":"Natal","days":3}'
 ```
 
+Agora o endpoint `/plan-trip` pode reaproveitar o `TripState` conversacional para montar o roteiro a partir das `groundedSuggestions` que já chegaram com a troca de mensagens. Basta incluir o `tripState` no payload (ex.: o estado de retorno do `/conversation/update`). Quando a conversa já tem lugares salvos (`savedPlacesByCity`), esses candidatos entram primeiro no planejamento e o `plan-trip` só recorre às sugestões em seguida; quando não há evidências recentes, o planner cai nos fixtures padrão e adiciona um aviso honesto no resultado.
+
+Exemplo mínimo usando TripState com evidência retrieval:
+
+```bash
+curl -sS -X POST http://localhost:3001/plan-trip \
+  -H 'content-type: application/json' \
+  -d '{
+    "origin":"Fortaleza",
+    "destination":"Recife",
+    "days":3,
+    "tripState":{
+      "conversationMeta":{
+        "lastSuggestions":[{
+          "rank":1,
+          "city":"Recife",
+          "region":"Varzea",
+          "title":"Instituto Ricardo Brennand",
+          "category":"attraction",
+          "summary":"Complexo cultural com museu e jardins.",
+          "source":"manual:recife-v1",
+          "score":0.92,
+          "docId":"recife-attraction-instituto-ricardo-brennand",
+          "chunkId":"recife-attraction-instituto-ricardo-brennand-chunk-1"
+        }]
+      }
+    }
+  }'
+```
+
 ```bash
 curl -sS -X POST http://localhost:3001/conversation/update \
   -H 'content-type: application/json' \
@@ -91,6 +121,14 @@ curl -sS -X POST http://localhost:3001/retrieve \
   -H 'content-type: application/json' \
   -d '{"query":"museu e historia","city":"Recife","topK":3}'
 ```
+
+Validação mínima da integração retrieval → planner:
+
+```bash
+pnpm --dir apps/api test:plan-trip-validation
+```
+
+O script roda dois cenários: um com `tripState.conversationMeta.lastSuggestions` (sem fallback) e outro sem evidência retrieval (aguarde o aviso de fallback). Isso garante que o planner consome as sugestões conversacionais.
 
 Exemplo de resposta conversacional:
 
@@ -318,6 +356,7 @@ Melhorias de nextQuestion (slot-filling com prioridade):
   - `tripState.conversationMeta.confidenceByField` (opcional)
   - `tripState.conversationMeta.currentFocusCity`
   - `tripState.conversationMeta.currentFocusField`
+  - `tripState.conversationMeta.preferencesReused` (true quando reutilizado, false quando atualizado nesta rodada)
 
 Exemplo antes/depois (resumo):
 - antes:
@@ -348,6 +387,9 @@ Resolucao contextual de lugar (minima):
   - `quero viajar de Sao Vicente para Sao Miguel` -> cidades limpas
   - depois: `pretendo passar 4 dias la` -> aplica no destino/foco atual
   - `quero ficar 2 dias nessa parada` -> aplica no stop em foco quando houver
+
+Normalizacao geográfica leve:
+- extraimos nomes limpos (sem ruído textual) e aplicamos uma camada local que corrige typos óbvios (`Rio de Janiero` → `Rio de Janeiro`, `Fortalez` → `Fortaleza`, etc.) e impede que nomes de estado (Bahia, Minas Gerais, São Paulo, etc.) virem cidades fictícias quando não houver contexto adicional. Essa função (`normalizeGeographicMention`) é o único lugar onde a extração modifica places antes de persistir no estado.
 
 Nucleo conversacional (pipeline modular):
 - `extractConversationSignals`

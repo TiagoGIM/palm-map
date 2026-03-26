@@ -110,6 +110,10 @@ export type ConversationMeta = {
   lastSuggestionsRegion?: string
   lastSuggestionsQuery?: string
   lastSuggestionsAt?: string
+  /**
+   * Indica se as preferências atuais foram reaproveitadas do contexto anterior.
+   */
+  preferencesReused?: boolean
 }
 
 /** Free-form user message used to update the conversational TripState. */

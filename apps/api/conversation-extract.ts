@@ -4,6 +4,7 @@ import {
   type LlmStructuredExtraction,
 } from './conversation-llm-adapter'
 import { normalizeCity } from './conversation-city-utils'
+import { normalizeGeographicMention } from './conversation-location-utils'
 import {
   type ConversationUpdateRuntimeEnv,
   type ExtractedSavedPlaceAdd,
@@ -98,17 +99,16 @@ function extractHeuristicFromMessage(
 
   const stops = extractStops(message)
 
+  const originCandidate = fullRoute?.[1] ?? originOnly?.[1]
+  const destinationCandidate = fullRoute?.[2] ?? destinationOnly?.[1]
+
   const base: ExtractedUpdate = {
-    origin: fullRoute?.[1]
-      ? normalizeCity(fullRoute[1])
-      : originOnly?.[1]
-        ? normalizeCity(originOnly[1])
-        : undefined,
-    destination: fullRoute?.[2]
-      ? normalizeCity(fullRoute[2])
-      : destinationOnly?.[1]
-        ? normalizeCity(destinationOnly[1])
-        : undefined,
+    origin: originCandidate
+      ? normalizeGeographicMention(originCandidate)
+      : undefined,
+    destination: destinationCandidate
+      ? normalizeGeographicMention(destinationCandidate)
+      : undefined,
     daysTotal: extractDaysTotal(lower),
     stops,
     likes,
@@ -126,14 +126,26 @@ function extractHeuristicFromMessage(
 
 function mapLlmExtractionToUpdate(llm: LlmStructuredExtraction): ExtractedUpdate {
   return {
-    origin: llm.origin,
-    destination: llm.destination,
+    origin: llm.origin ? normalizeGeographicMention(llm.origin) : undefined,
+    destination: llm.destination
+      ? normalizeGeographicMention(llm.destination)
+      : undefined,
     daysTotal: llm.daysTotal,
-    stops: llm.stops.map((stop) => ({
-      city: stop.city,
-      stayDays: stop.stayDays,
-      strongAppend: true,
-    })),
+    stops: llm.stops
+      .map((stop) => {
+        const normalizedCity = normalizeGeographicMention(stop.city)
+        if (!normalizedCity) {
+          return null
+        }
+        return {
+          city: normalizedCity,
+          stayDays: stop.stayDays,
+          strongAppend: true,
+        }
+      })
+      .filter(
+        (stop): stop is ExtractedStopMention => Boolean(stop),
+      ),
     likes: llm.likes,
     dislikes: llm.dislikes,
     pace: llm.pace,
@@ -425,7 +437,8 @@ function extractStops(message: string): ExtractedStopMention[] {
 
   routePatterns.forEach((pattern) => {
     for (const match of message.matchAll(pattern)) {
-      const city = normalizeCity(match[1] ?? '')
+      const rawCity = match[1] ?? ''
+      const city = rawCity ? normalizeGeographicMention(rawCity) : undefined
       if (!city || /\d/.test(city)) {
         continue
       }
@@ -445,7 +458,8 @@ function extractStops(message: string): ExtractedStopMention[] {
   stayPatterns.forEach((pattern) => {
     for (const match of message.matchAll(pattern)) {
       const stayDays = Number(match[1])
-      const city = normalizeCity(match[2] ?? '')
+      const rawCity = match[2] ?? ''
+      const city = rawCity ? normalizeGeographicMention(rawCity) : undefined
 
       if (!city || !Number.isInteger(stayDays) || stayDays < 1) {
         continue
