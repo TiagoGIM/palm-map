@@ -1,7 +1,10 @@
 
+import { handlePlanTrip } from '../plan-trip'
+import type { PlanTripInput } from '../../packages/shared-types/plan-trip.ts'
+
 type PlanTripScenario = {
   name: string
-  input: unknown
+  input: PlanTripInput
   expectFallback: boolean
 }
 
@@ -48,9 +51,6 @@ const scenarios: PlanTripScenario[] = [
 ]
 
 async function runValidation() {
-  const { pathToFileURL } = await import('node:url')
-  const planTripUrl = pathToFileURL(new URL('../plan-trip.ts', import.meta.url).pathname)
-  const { handlePlanTrip } = await import(planTripUrl.href)
   for (const scenario of scenarios) {
     console.log(`executando cenarios: ${scenario.name}`)
     const result = await handlePlanTrip(scenario.input)

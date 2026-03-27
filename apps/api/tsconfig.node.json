@@ -1,0 +1,7 @@
+{
+  "extends": "../../tsconfig.node.json",
+  "compilerOptions": {
+    "moduleResolution": "NodeNext"
+  },
+  "include": ["scripts/**/*.ts"]
+}

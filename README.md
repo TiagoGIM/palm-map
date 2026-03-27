@@ -54,8 +54,8 @@ Se precisarmos fixar uma stack depois, uma composicao simples com web leve, API 
 
 ## Execução TypeScript local
 
-- O repositório compartilha `tsconfig.node.json` para scripts de Node; `apps/api/tsconfig.json` estende esse padrão.  
-- Execute validações TypeScript via `TS_NODE_PROJECT=tsconfig.json node --loader ts-node/esm --experimental-specifier-resolution=node` (ex.: `pnpm --dir apps/api test:plan-trip-validation`) para herdar `tsconfig.node.json` sem precisar de `.ts`.
+- O repositório compartilha `tsconfig.node.json` para scripts de Node; `apps/api/tsconfig.json` define as opções bundler/es2024 usadas pelo Worker.  
+- Execute validações TypeScript com `pnpm --dir apps/api test:plan-trip-validation` (esse script chama `tsx --tsconfig tsconfig.node.json scripts/validate-plan-trip.ts`). Use `pnpm --dir apps/api check:ts` para executar `tsx --tsconfig tsconfig.node.json --check scripts/validate-plan-trip.ts` e ter uma verificação de tipos focada nos scripts.
 - Scripts que precisarem de paths relativos a `packages/*` devem obedecer à resolução `NodeNext`/`bundler` da tsconfig.  
 - Qualquer novo script TypeScript deve registrar o comando no `package.json` relevante e documentar a execução no runbook.
 

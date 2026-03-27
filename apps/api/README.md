@@ -130,6 +130,10 @@ pnpm --dir apps/api test:plan-trip-validation
 
 O script roda dois cenários: um com `tripState.conversationMeta.lastSuggestions` (sem fallback) e outro sem evidência retrieval (aguarde o aviso de fallback). Isso garante que o planner consome as sugestões conversacionais.
 
+### Scripts TypeScript locais
+
+Scripts dentro de `apps/api/scripts` herdam `tsconfig.json` (para a Worker) e `tsconfig.node.json` (para os scripts). Execute `pnpm --dir apps/api test:plan-trip-validation` para rodar `tsx -p tsconfig.node.json scripts/validate-plan-trip.ts` e `pnpm --dir apps/api check:ts` para `tsx -p tsconfig.node.json --check scripts/validate-plan-trip.ts`. O runtime bundler/NodeNext permite imports diretos sem `pathToFileURL`.
+
 Exemplo de resposta conversacional:
 
 ```json

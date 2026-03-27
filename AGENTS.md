@@ -30,4 +30,4 @@
 - Sempre que possivel, usar contratos definidos em packages/shared-types.
 - Nao inferir regras de negocio fora dos contratos ou do escopo da tarefa.
 - Use `pnpm` como package manager padrao do repositorio (instalar dependencias e rodar scripts).
-- Scripts TypeScript rodados localmente devem usar `TS_NODE_PROJECT=tsconfig.json node --loader ts-node/esm --experimental-specifier-resolution=node` (com `tsconfig.json`/`tsconfig.node.json`) e seguir o padrão NodeNext/bundler sem adicionar `.ts` manualmente; documente qualquer exceção no runbook.
+- Scripts TypeScript rodados localmente devem usar `tsx` (por exemplo `tsx --tsconfig tsconfig.node.json scripts/foo.ts` no caso da API, mantendo `tsconfig.json`/`tsconfig.node.json` alinhadas); documente qualquer exceção no runbook.
