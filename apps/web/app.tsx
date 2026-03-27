@@ -12,6 +12,7 @@ import { requestConversationUpdate } from './conversation-update-api'
 import { AppBar } from './ui/navigation/AppBar'
 import { Button } from './ui/primitives/Button'
 import { Card } from './ui/primitives/Card'
+import { TripOverviewSheet } from './ui/components/TripOverviewSheet'
 
 type ConversationMessage = {
   id: string
@@ -41,6 +42,7 @@ export function App() {
   const [currentTripLegs, setCurrentTripLegs] = useState<TripLeg[] | undefined>()
   const [conversationMeta, setConversationMeta] =
     useState<ConversationMeta | undefined>()
+  const [isTripOverviewOpen, setTripOverviewOpen] = useState(false)
 
   const planNodes = useMemo(() => {
     if (!tripState) {
@@ -96,6 +98,12 @@ export function App() {
 
     feedScrollRef.current.scrollTop = feedScrollRef.current.scrollHeight
   }, [messages, isSubmitting])
+
+  useEffect(() => {
+    if (!tripState) {
+      setTripOverviewOpen(false)
+    }
+  }, [tripState])
 
   async function handleSubmit(rawMessage?: string) {
     const message = (rawMessage ?? draftMessage).trim()
@@ -308,6 +316,16 @@ export function App() {
               ) : null}
             </div>
           ) : null}
+
+          <div className="state-summary__actions">
+            <Button
+              variant="tonal"
+              onClick={() => setTripOverviewOpen(true)}
+              disabled={!tripState}
+            >
+              Minha Trip
+            </Button>
+          </div>
         </section>
       ) : null}
 
@@ -399,6 +417,13 @@ export function App() {
           </Button>
         </div>
       </Card>
+
+      <TripOverviewSheet
+        open={isTripOverviewOpen}
+        onClose={() => setTripOverviewOpen(false)}
+        tripState={tripState}
+        tripLegs={currentTripLegs}
+      />
 
       {error ? <p className="error-note" role="alert">{error}</p> : null}
       {isSubmitting ? <p className="text-sm text-onsurface/70">Atualizando estado da viagem...</p> : null}

@@ -368,3 +368,131 @@ body {
   display: grid;
   gap: 6px;
 }
+
+.state-summary__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.trip-overview {
+  display: grid;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+}
+
+.trip-overview__section {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.trip-overview__section + .trip-overview__section {
+  border-top: 1px solid rgb(var(--color-outline) / 0.5);
+  padding-top: var(--space-2);
+}
+
+.trip-overview__section-title {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.trip-overview__summary-grid {
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.trip-overview__label {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: rgb(var(--color-on-muted));
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.trip-overview__value {
+  margin: 2px 0 0;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.trip-overview__section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trip-overview__hint {
+  font-size: var(--font-size-xs);
+  color: rgb(var(--color-on-muted));
+}
+
+.trip-overview__leg-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.trip-overview__leg-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+}
+
+.trip-overview__leg-meta {
+  font-size: var(--font-size-xs);
+  color: rgb(var(--color-on-muted));
+}
+
+.trip-overview__empty {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: rgb(var(--color-on-muted));
+}
+
+.trip-overview__saved-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.trip-overview__saved-city {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.trip-overview__saved-place-list {
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+}
+
+.trip-overview__saved-place {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+  color: rgb(var(--color-on-surface));
+}
+
+.trip-overview__saved-name {
+  max-width: 60%;
+  overflow-wrap: anywhere;
+}
+
+.trip-overview__saved-source {
+  font-size: var(--font-size-xs);
+  color: rgb(var(--color-on-muted));
+}
+
+.trip-overview__preferences {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}

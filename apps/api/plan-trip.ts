@@ -1,10 +1,77 @@
 import type {
+  DayPlan,
   PlanTripInput,
   PlanTripResult,
   PlaceCandidate,
-  GroundedSuggestionItem,
-  TripState,
-} from '../../packages/shared-types/index.ts'
+} from '../../packages/shared-types/plan-trip.ts'
+import type { GroundedSuggestionItem, TripState } from '../../packages/shared-types/conversational-trip.ts'
+
+type FixturePlace = {
+  name: string
+  location: string
+  source: string
+  confidence: number
+}
+
+const fixtureData: Record<string, FixturePlace[]> = {
+  recife: [
+    {
+      name: 'Marco Zero',
+      location: 'Recife Antigo, Recife, PE',
+      source: 'mock-guide:recife-v1',
+      confidence: 0.96,
+    },
+    {
+      name: 'Praia de Boa Viagem',
+      location: 'Boa Viagem, Recife, PE',
+      source: 'mock-guide:recife-v1',
+      confidence: 0.95,
+    },
+    {
+      name: 'Parque Dona Lindu',
+      location: 'Boa Viagem, Recife, PE',
+      source: 'mock-guide:recife-v1',
+      confidence: 0.88,
+    },
+    {
+      name: 'Instituto Ricardo Brennand',
+      location: 'Várzea, Recife, PE',
+      source: 'mock-guide:recife-v1',
+      confidence: 0.94,
+    },
+    {
+      name: 'Oficina Ceramica Francisco Brennand',
+      location: 'Várzea, Recife, PE',
+      source: 'mock-guide:recife-v1',
+      confidence: 0.9,
+    },
+    {
+      name: 'Cais do Sertao',
+      location: 'Recife Antigo, Recife, PE',
+      source: 'mock-guide:recife-v1',
+      confidence: 0.91,
+    },
+    {
+      name: 'Paco do Frevo',
+      location: 'Recife Antigo, Recife, PE',
+      source: 'mock-guide:recife-v1',
+      confidence: 0.9,
+    },
+  ],
+}
+
+let storedPreferencesText: string | undefined
+
+function resolveEffectivePreferencesText(
+  explicitPreferencesText: string | undefined,
+): string | undefined {
+  if (explicitPreferencesText !== undefined) {
+    storedPreferencesText = explicitPreferencesText
+    return explicitPreferencesText
+  }
+
+  return storedPreferencesText
+}
 
 type ApiErrorBody = {
   error: {
@@ -42,23 +109,6 @@ export async function handlePlanTrip(
     }
   }
 
-  const [
-    domainRetrievalModule,
-    domainMemoryModule,
-    domainTripModule,
-  ] = await Promise.all([
-    import('../../packages/domain-retrieval/fixtures.ts'),
-    import('../../packages/domain-memory/index.ts'),
-    import('../../packages/domain-trip/index.ts'),
-  ])
-
-  const { placeFixturesByDestination } =
-    domainRetrievalModule as typeof import('../../packages/domain-retrieval/fixtures.ts')
-  const { resolveEffectivePreferencesText } =
-    domainMemoryModule as typeof import('../../packages/domain-memory/index.ts')
-  const { buildPlanTripResult, rankPlacesByPreferences } =
-    domainTripModule as typeof import('../../packages/domain-trip/index.ts')
-
   const effectivePreferencesText = resolveEffectivePreferencesText(
     input.preferencesText,
   )
@@ -76,9 +126,7 @@ export async function handlePlanTrip(
     retrievalUsed = true
   } else {
     const destinationKey = normalizeDestination(input.destination)
-    const fixtures = placeFixturesByDestination[
-      destinationKey as keyof typeof placeFixturesByDestination
-    ]
+    const fixtures = fixtureData[destinationKey as keyof typeof fixtureData]
     if (!fixtures || fixtures.length === 0) {
       return {
         status: 404,
@@ -91,7 +139,7 @@ export async function handlePlanTrip(
       }
     }
 
-    planPlaces = fixtures
+    planPlaces = fixtures.map(mapFixtureToPlaceCandidate)
   }
 
   const rankedPlaces = rankPlacesByPreferences({
@@ -182,6 +230,15 @@ function mapGroundedSuggestionToPlaceCandidate(
     source: suggestion.source,
     confidence: clampConfidence(suggestion.score),
     id: suggestion.docId ?? suggestion.chunkId,
+  }
+}
+
+function mapFixtureToPlaceCandidate(fixture: FixturePlace): PlaceCandidate {
+  return {
+    name: fixture.name,
+    location: fixture.location,
+    source: fixture.source,
+    confidence: clampConfidence(fixture.confidence),
   }
 }
 
@@ -291,4 +348,111 @@ function normalizeDestination(destination: string): string {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
+}
+
+type RankPlacesByPreferencesInput = {
+  places: PlaceCandidate[]
+  preferencesText?: string
+}
+
+function buildPlanTripResult(input: {
+  days: number
+  places: PlaceCandidate[]
+}): PlanTripResult {
+  if (input.places.length === 0) {
+    return {
+      days: [],
+      warnings: ['No grounded places available for planning.'],
+    }
+  }
+
+  const dayCount = Math.max(1, Math.min(input.days, input.places.length))
+  const days = createEmptyDays(dayCount)
+
+  input.places.forEach((place, index) => {
+    days[index % dayCount].items.push(place)
+  })
+
+  const warnings =
+    input.places.length < input.days
+      ? ['Not enough grounded places to fill all requested days.']
+      : undefined
+
+  return {
+    days,
+    warnings,
+  }
+}
+
+function createEmptyDays(dayCount: number): DayPlan[] {
+  return Array.from({ length: dayCount }, (_, index) => ({
+    day: index + 1,
+    items: [],
+  }))
+}
+
+function rankPlacesByPreferences(
+  input: RankPlacesByPreferencesInput,
+): PlaceCandidate[] {
+  if (!input.preferencesText) {
+    return input.places
+  }
+
+  const tokens = tokenizePreferences(input.preferencesText)
+  if (tokens.length === 0) {
+    return input.places
+  }
+
+  const withScore = input.places.map((place, index) => {
+    const haystack = `${place.name} ${place.location}`.toLowerCase()
+    const matched = tokens.filter((token) => tokenMatches(haystack, token)).length
+
+    return {
+      place,
+      index,
+      matched,
+    }
+  })
+
+  const hasAnyMatch = withScore.some((entry) => entry.matched > 0)
+  if (!hasAnyMatch) {
+    return input.places
+  }
+
+  return [...withScore]
+    .sort((a, b) => {
+      if (a.matched !== b.matched) {
+        return b.matched - a.matched
+      }
+
+      if (a.place.confidence !== b.place.confidence) {
+        return b.place.confidence - a.place.confidence
+      }
+
+      return a.index - b.index
+    })
+    .map((entry) => entry.place)
+}
+
+function tokenizePreferences(preferencesText: string): string[] {
+  return preferencesText
+    .toLowerCase()
+    .split(/[^a-z0-9\u00c0-\u024f]+/i)
+    .map((token) => token.trim())
+    .filter((token) => token.length >= 3)
+}
+
+function tokenMatches(searchable: string, token: string): boolean {
+  if (searchable.includes(token)) {
+    return true
+  }
+
+  if (token.length > 3 && token.endsWith('s')) {
+    const singular = token.slice(0, -1)
+    if (searchable.includes(singular)) {
+      return true
+    }
+  }
+
+  return false
 }
