@@ -132,20 +132,24 @@ function mapLlmExtractionToUpdate(llm: LlmStructuredExtraction): ExtractedUpdate
       : undefined,
     daysTotal: llm.daysTotal,
     stops: llm.stops
-      .map((stop) => {
+      .map((stop): ExtractedStopMention | null => {
         const normalizedCity = normalizeGeographicMention(stop.city)
         if (!normalizedCity) {
           return null
         }
-        return {
+
+        const stopMention: ExtractedStopMention = {
           city: normalizedCity,
-          stayDays: stop.stayDays,
           strongAppend: true,
         }
+
+        if (typeof stop.stayDays === 'number') {
+          stopMention.stayDays = stop.stayDays
+        }
+
+        return stopMention
       })
-      .filter(
-        (stop): stop is ExtractedStopMention => Boolean(stop),
-      ),
+      .filter((stop): stop is ExtractedStopMention => stop !== null),
     likes: llm.likes,
     dislikes: llm.dislikes,
     pace: llm.pace,
