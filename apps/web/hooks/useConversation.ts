@@ -11,11 +11,16 @@ import { requestConversationUpdate } from '../conversation-update-api'
 const SESSION_ID_KEY = 'palm_map_session_id'
 
 function getOrCreateSessionId(): string {
-  const stored = localStorage.getItem(SESSION_ID_KEY)
-  if (stored) return stored
-  const id = crypto.randomUUID()
-  localStorage.setItem(SESSION_ID_KEY, id)
-  return id
+  try {
+    const stored = localStorage.getItem(SESSION_ID_KEY)
+    if (stored) return stored
+    const id = crypto.randomUUID()
+    localStorage.setItem(SESSION_ID_KEY, id)
+    return id
+  } catch {
+    // Safari private mode / QuotaExceededError — fallback to ephemeral session
+    return crypto.randomUUID()
+  }
 }
 
 function buildSystemText(tripState: TripState): string {

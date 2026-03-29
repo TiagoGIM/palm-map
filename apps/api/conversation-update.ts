@@ -77,8 +77,12 @@ export async function handleConversationUpdate(
   // If the client provides no tripState but sends a sessionId, try loading from D1.
   let resolvedTripState = input.tripState
   if (!resolvedTripState && input.sessionId && env.PALM_MAP_DB) {
-    const stored = await loadSessionState(env.PALM_MAP_DB, input.sessionId)
-    if (stored) resolvedTripState = stored
+    try {
+      const stored = await loadSessionState(env.PALM_MAP_DB, input.sessionId)
+      if (stored) resolvedTripState = stored
+    } catch (err) {
+      console.log(JSON.stringify({ svc: 'conversation', event: 'd1_load_failed', error: String(err) }))
+    }
   }
 
   const baseState = createBaseTripState(resolvedTripState)
@@ -154,7 +158,11 @@ export async function handleConversationUpdate(
 
   // Persist session state to D1 when binding is available.
   if (input.sessionId && env.PALM_MAP_DB) {
-    await saveSessionState(env.PALM_MAP_DB, input.sessionId, nextTripState)
+    try {
+      await saveSessionState(env.PALM_MAP_DB, input.sessionId, nextTripState)
+    } catch (err) {
+      console.log(JSON.stringify({ svc: 'conversation', event: 'd1_save_failed', error: String(err) }))
+    }
   }
 
   return {
@@ -308,6 +316,10 @@ function parseConversationUpdateInput(
   const { message, tripState, sessionId } = value
 
   if (typeof message !== 'string' || message.trim() === '') {
+    return null
+  }
+
+  if (message.trim().length > 2000) {
     return null
   }
 

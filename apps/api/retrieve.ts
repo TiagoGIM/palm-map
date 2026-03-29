@@ -48,10 +48,14 @@ export async function handleRetrieve(
     return { status: 200, body: localResult }
   }
 
-  const d1Result = await retrieveFromD1(db, input)
-  const merged = mergeResults(localResult, d1Result, input.topK ?? 5)
-
-  return { status: 200, body: merged }
+  try {
+    const d1Result = await retrieveFromD1(db, input)
+    const merged = mergeResults(localResult, d1Result, input.topK ?? 5)
+    return { status: 200, body: merged }
+  } catch (err) {
+    console.log(JSON.stringify({ svc: 'retrieve', event: 'd1_failed', error: String(err) }))
+    return { status: 200, body: localResult }
+  }
 }
 
 /**

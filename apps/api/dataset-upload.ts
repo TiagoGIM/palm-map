@@ -281,10 +281,15 @@ function parseDatasetUploadInput(value: unknown): DatasetUploadInput | null {
   if (typeof city !== 'string' || city.trim() === '') return null
   if (!Array.isArray(documents)) return null
 
+  const normalizedArtifactId =
+    typeof artifactId === 'string'
+      ? artifactId.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-')
+      : undefined
+
   return {
     city: city.trim(),
     documents,
-    artifactId: typeof artifactId === 'string' ? artifactId.trim() : undefined,
+    artifactId: normalizedArtifactId,
   }
 }
 

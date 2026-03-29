@@ -89,6 +89,12 @@ export function DatasetManagerSheet({ open, onClose }: Props) {
       return
     }
 
+    if (value.length > 2 * 1024 * 1024) {
+      setValidDocs([])
+      setParseErrors(['JSON muito grande. Divida em lotes menores (máx. 2 MB).'])
+      return
+    }
+
     let parsed: unknown
     try {
       parsed = JSON.parse(value)

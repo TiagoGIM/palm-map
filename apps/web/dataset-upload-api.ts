@@ -21,8 +21,12 @@ export async function requestDatasetUpload(
   })
 
   if (!response.ok) {
-    const error = (await response.json()) as DatasetApiError
-    throw new Error(error.error.message)
+    let message = `HTTP ${response.status}`
+    try {
+      const body = (await response.json()) as DatasetApiError
+      message = body.error?.message ?? message
+    } catch { /* ignore parse failure — use generic HTTP status message */ }
+    throw new Error(message)
   }
 
   return (await response.json()) as DatasetUploadResult

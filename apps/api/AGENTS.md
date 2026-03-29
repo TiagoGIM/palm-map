@@ -24,3 +24,8 @@
 - A API deve depender de contratos, nao de detalhes internos.
 
 - Prefira mocks e adapters simples antes de providers reais.
+
+## Trade-offs aceitos (MVP)
+
+- **CORS wildcard** (`API_ALLOWED_ORIGIN = "*"`): API publica por design — nao ha sessao autenticada.
+- **`/dataset/upload` sem autenticacao**: Aceitavel em staging privado. Antes de ir para producao, proteger o endpoint com um shared secret (header `X-Upload-Key`) ou restringir por IP/origin.
