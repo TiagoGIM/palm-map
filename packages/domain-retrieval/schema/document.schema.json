@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://palm-map.local/schema/recife-v1-document.schema.json",
-  "title": "RecifeV1Document",
+  "$id": "https://palm-map.local/schema/document.schema.json",
+  "title": "PalmMapDocument",
   "type": "object",
   "additionalProperties": false,
   "required": [

@@ -1,10 +1,13 @@
 import type { TripState } from '../../packages/shared-types'
 import type { ConversationLlmEnv } from './conversation-llm-adapter'
+import type { D1Database } from '../../packages/domain-memory'
 
 export type ConversationUpdateRuntimeEnv = ConversationLlmEnv & {
   CONVERSATION_LLM_DEBUG?: string
   CONVERSATION_UPDATE_DEBUG?: string
   CONVERSATION_LLM_MIN_CONFIDENCE?: string
+  /** D1 database binding — only present when the Cloudflare D1 resource is configured. */
+  PALM_MAP_DB?: D1Database
 }
 
 export type MissingField = 'origin' | 'destination' | 'daysTotal' | undefined

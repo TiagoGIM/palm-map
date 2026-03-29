@@ -28,18 +28,14 @@ export function logExtractionMode(params: {
   event: 'llm_used' | 'fallback_used' | 'validation_failed'
   reason?: string
 }): void {
-  const debugEnabled =
-    (params.env.CONVERSATION_LLM_DEBUG ?? '').toLowerCase() === 'true'
-  if (!debugEnabled) {
-    return
+  // extraction_mode is always logged (production signal for LLM performance)
+  const entry: Record<string, unknown> = {
+    svc: 'conversation',
+    event: 'extraction_mode',
+    mode: params.event,
   }
-
-  if (params.reason) {
-    console.log(`[conversation-update] ${params.event} reason=${params.reason}`)
-    return
-  }
-
-  console.log(`[conversation-update] ${params.event}`)
+  if (params.reason) entry['reason'] = params.reason
+  console.log(JSON.stringify(entry))
 }
 
 export function logConversationStage(
@@ -55,19 +51,11 @@ export function logConversationStage(
 ): void {
   const debugEnabled =
     (env.CONVERSATION_UPDATE_DEBUG ?? '').toLowerCase() === 'true'
+  if (!debugEnabled) return
 
-  if (!debugEnabled) {
-    return
-  }
-
-  if (!payload) {
-    console.log(`[conversation-update] stage=${stage}`)
-    return
-  }
-
-  console.log(
-    `[conversation-update] stage=${stage} payload=${JSON.stringify(payload)}`,
-  )
+  const entry: Record<string, unknown> = { svc: 'conversation', event: 'stage', stage }
+  if (payload) entry['payload'] = payload
+  console.log(JSON.stringify(entry))
 }
 
 export function logConversationUpdateDebug(params: {
@@ -92,9 +80,22 @@ export function logConversationUpdateDebug(params: {
     return
   }
 
-  console.log(
-    `[conversation-update] flow previous=${JSON.stringify(summarizeTripState(params.previousState))} previousAskedField=${params.previousAskedField ?? 'none'} missingField=${params.missingField ?? 'none'} message=${JSON.stringify(params.message)} extracted=${JSON.stringify(summarizeExtractedUpdate(params.extracted))} focusCity=${JSON.stringify(params.focusCity)} updatedField=${params.updatedField ?? 'none'} next=${JSON.stringify(summarizeTripState(params.nextState))} unresolved=${JSON.stringify(params.finalUnresolvedFields)} finalAskedField=${params.finalAskedField ?? 'none'} assistantMessage=${JSON.stringify(params.assistantMessage)} nextQuestion=${JSON.stringify(params.nextQuestion)}`,
-  )
+  console.log(JSON.stringify({
+    svc: 'conversation',
+    event: 'flow',
+    previous: summarizeTripState(params.previousState),
+    previousAskedField: params.previousAskedField ?? null,
+    missingField: params.missingField ?? null,
+    message: params.message,
+    extracted: summarizeExtractedUpdate(params.extracted),
+    focusCity: params.focusCity ?? null,
+    updatedField: params.updatedField ?? null,
+    next: summarizeTripState(params.nextState),
+    unresolved: params.finalUnresolvedFields,
+    finalAskedField: params.finalAskedField ?? null,
+    assistantMessage: params.assistantMessage ?? null,
+    nextQuestion: params.nextQuestion ?? null,
+  }))
 }
 
 export function summarizeTripState(tripState: TripState): Record<string, unknown> {

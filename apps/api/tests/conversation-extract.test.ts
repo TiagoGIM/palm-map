@@ -50,6 +50,10 @@ describe('extractDaysTotal', () => {
     expect(extractDaysTotal('12 dias de viagem')).toBe(12)
   })
 
+  it('extrai dias com "ficando X dias"', () => {
+    expect(extractDaysTotal('saindo de natal, vou para salvador, ficando 10 dias')).toBe(10)
+  })
+
   it('retorna undefined quando não há menção de dias', () => {
     expect(extractDaysTotal('quero ir para recife')).toBeUndefined()
   })
@@ -228,6 +232,40 @@ describe('extractFromMessage (heurística)', () => {
     })
 
     expect(result.suggestionIntent).toBe(true)
+  })
+
+  it('extrai destino de "chegar em X"', async () => {
+    const result = await extractFromMessage({
+      message: 'Quero passar 3 dias em Caruaru antes de chegar em Recife',
+      tripState: emptyTripState(),
+      env: mockEnv,
+    })
+    expect(result.destination?.toLowerCase()).toBe('recife')
+    const carauruStop = result.stops.find((s) => s.city.toLowerCase() === 'caruaru')
+    expect(carauruStop?.stayDays).toBe(3)
+  })
+
+  it('extrai budget "econômica" com acento', async () => {
+    const result = await extractFromMessage({
+      message: 'Quero uma viagem econômica e tranquila',
+      tripState: emptyTripState(),
+      env: mockEnv,
+    })
+    expect(result.budget).toBe('low')
+  })
+
+  it('extrai a 1ª parada com dias de "passando por X N dias"', async () => {
+    // A heurística captura a 1ª cidade da cadeia "passando por X N dias e Y N dias".
+    // Múltiplas paradas em cadeia exigem LLM (limite da abordagem regex).
+    const result = await extractFromMessage({
+      message: 'De Brasília, passando por Goiânia 2 dias e Uberlândia 1 dia, até Belo Horizonte',
+      tripState: emptyTripState(),
+      env: mockEnv,
+    })
+    const goiania = result.stops.find(
+      (s) => s.city.toLowerCase().includes('goiânia') || s.city.toLowerCase().includes('goiania'),
+    )
+    expect(goiania?.stayDays).toBe(2)
   })
 
   it('detecta intenção de salvar por referência ordinal', async () => {

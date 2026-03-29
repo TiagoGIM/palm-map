@@ -1,5 +1,9 @@
-import type { RetrieveInput, RetrieveResult } from '../../packages/shared-types'
-import { retrieveLocalRecifeV1 } from '../../packages/domain-retrieval/retrieve-local'
+import type { RetrieveHit, RetrieveInput, RetrieveResult } from '../../packages/shared-types'
+import type { D1Database } from '../../packages/domain-memory'
+import {
+  retrieveLocalRecifeV1,
+  retrieveFromD1,
+} from '../../packages/domain-retrieval/retrieve-local'
 
 type ApiErrorBody = {
   error: {
@@ -20,7 +24,10 @@ type ApiErrorResponse = {
 
 export type RetrieveHttpResponse = ApiSuccessResponse | ApiErrorResponse
 
-export function handleRetrieve(requestBody: unknown): RetrieveHttpResponse {
+export async function handleRetrieve(
+  requestBody: unknown,
+  db?: D1Database,
+): Promise<RetrieveHttpResponse> {
   const input = parseRetrieveInput(requestBody)
 
   if (!input) {
@@ -35,9 +42,53 @@ export function handleRetrieve(requestBody: unknown): RetrieveHttpResponse {
     }
   }
 
+  const localResult = retrieveLocalRecifeV1(input)
+
+  if (!db) {
+    return { status: 200, body: localResult }
+  }
+
+  const d1Result = await retrieveFromD1(db, input)
+  const merged = mergeResults(localResult, d1Result, input.topK ?? 5)
+
+  return { status: 200, body: merged }
+}
+
+/**
+ * Merges local and D1 results: deduplicates by chunkId (local takes precedence),
+ * re-sorts by score descending, and slices to topK.
+ */
+function mergeResults(
+  local: RetrieveResult,
+  d1: RetrieveResult,
+  topK: number,
+): RetrieveResult {
+  const seen = new Set<string>()
+  const combined: RetrieveHit[] = []
+
+  for (const hit of local.results) {
+    seen.add(hit.chunkId)
+    combined.push(hit)
+  }
+
+  for (const hit of d1.results) {
+    if (!seen.has(hit.chunkId)) {
+      combined.push(hit)
+    }
+  }
+
+  combined.sort((a, b) => b.score - a.score)
+
+  const results = combined.slice(0, topK)
+
   return {
-    status: 200,
-    body: retrieveLocalRecifeV1(input),
+    query: local.query,
+    city: local.city,
+    topK,
+    results,
+    ...(results.length === 0
+      ? { warning: local.warning ?? d1.warning }
+      : {}),
   }
 }
 

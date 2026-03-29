@@ -1,11 +1,12 @@
 import { handleConversationUpdate } from './conversation-update'
+import { handleDatasetUpload } from './dataset-upload'
 import { handlePlanTrip } from './plan-trip'
 import { handleRetrieve } from './retrieve'
+import type { D1Database } from '../../packages/domain-memory'
 
 type WorkerEnv = {
   APP_ENV?: string
   API_ALLOWED_ORIGIN?: string
-  D1_BINDING_NAME?: string
   VECTORIZE_BINDING_NAME?: string
   CONVERSATION_LLM_ENABLED?: string
   CONVERSATION_LLM_API_KEY?: string
@@ -15,6 +16,8 @@ type WorkerEnv = {
   CONVERSATION_LLM_DEBUG?: string
   CONVERSATION_LLM_MIN_CONFIDENCE?: string
   CONVERSATION_UPDATE_DEBUG?: string
+  /** Real D1 database binding — present only when [[d1_databases]] is configured in wrangler.toml. */
+  PALM_MAP_DB?: D1Database
 }
 
 const CORS_HEADERS = {
@@ -45,10 +48,12 @@ export default {
       url.pathname === '/api/conversation/update'
     const isRetrieveRoute =
       url.pathname === '/retrieve' || url.pathname === '/api/retrieve'
+    const isDatasetUploadRoute =
+      url.pathname === '/dataset/upload' || url.pathname === '/api/dataset/upload'
 
     if (
       request.method !== 'POST' ||
-      (!isPlanTripRoute && !isConversationUpdateRoute && !isRetrieveRoute)
+      (!isPlanTripRoute && !isConversationUpdateRoute && !isRetrieveRoute && !isDatasetUploadRoute)
     ) {
       return jsonResponse(
         {
@@ -78,9 +83,11 @@ export default {
 
     const response = isConversationUpdateRoute
       ? await handleConversationUpdate(requestBody, env)
-      : isRetrieveRoute
-        ? handleRetrieve(requestBody)
-        : await handlePlanTrip(requestBody)
+      : isDatasetUploadRoute
+        ? await handleDatasetUpload(requestBody, env.PALM_MAP_DB)
+        : isRetrieveRoute
+          ? await handleRetrieve(requestBody, env.PALM_MAP_DB)
+          : await handlePlanTrip(requestBody)
 
     return jsonResponse(response.body, response.status, corsHeaders)
   },

@@ -32,6 +32,7 @@ import {
   summarizeExtractedUpdate,
   summarizeTripState,
 } from './conversation-logging'
+import { loadSessionState, saveSessionState } from '../../packages/domain-memory'
 
 export type { ConversationUpdateRuntimeEnv }
 export type { ConversationLlmEnv }
@@ -73,7 +74,14 @@ export async function handleConversationUpdate(
     }
   }
 
-  const baseState = createBaseTripState(input.tripState)
+  // If the client provides no tripState but sends a sessionId, try loading from D1.
+  let resolvedTripState = input.tripState
+  if (!resolvedTripState && input.sessionId && env.PALM_MAP_DB) {
+    const stored = await loadSessionState(env.PALM_MAP_DB, input.sessionId)
+    if (stored) resolvedTripState = stored
+  }
+
+  const baseState = createBaseTripState(resolvedTripState)
   const missingFieldBeforeMerge = getCurrentMissingField(baseState)
   const lastAskedFieldBeforeMerge = baseState.conversationMeta?.lastAskedField
 
@@ -143,6 +151,11 @@ export async function handleConversationUpdate(
     assistantMessage,
     nextQuestion,
   })
+
+  // Persist session state to D1 when binding is available.
+  if (input.sessionId && env.PALM_MAP_DB) {
+    await saveSessionState(env.PALM_MAP_DB, input.sessionId, nextTripState)
+  }
 
   return {
     status: 200,
@@ -292,7 +305,7 @@ function parseConversationUpdateInput(
     return null
   }
 
-  const { message, tripState } = value
+  const { message, tripState, sessionId } = value
 
   if (typeof message !== 'string' || message.trim() === '') {
     return null
@@ -305,6 +318,7 @@ function parseConversationUpdateInput(
   return {
     message: message.trim(),
     tripState: tripState as TripState | undefined,
+    sessionId: typeof sessionId === 'string' ? sessionId : undefined,
   }
 }
 

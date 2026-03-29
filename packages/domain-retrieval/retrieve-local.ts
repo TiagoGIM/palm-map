@@ -1,4 +1,5 @@
-import type { RetrieveHit, RetrieveInput, RetrieveResult } from '../shared-types'
+import type { RetrieveHit, RetrieveInput, RetrievalCategory, RetrieveResult } from '../shared-types'
+import type { D1Database } from '../domain-memory'
 import { recifeV1Chunks } from './artifacts/recife-v1.chunks'
 
 const DEFAULT_TOP_K = 5
@@ -12,19 +13,128 @@ export function retrieveLocalRecifeV1WithContext(
   input: RetrieveInput,
   context?: {
     regionHint?: string
-    categoryHint?: 'attraction' | 'neighborhood' | 'food_cafe' | 'logistics'
+    categoryHint?: RetrievalCategory
   },
 ): RetrieveResult {
   const query = input.query.trim()
   const city = normalizeCity(input.city)
   const topK = clampTopK(input.topK)
-  const normalizedRegionHint = normalizeText(context?.regionHint ?? '')
 
+  const localHits = scoreAndRank({
+    chunks: recifeV1Chunks.filter((chunk) => normalizeText(chunk.city) === city),
+    query,
+    topK,
+    context,
+  })
+
+  if (localHits.length === 0) {
+    return {
+      query,
+      city: denormalizeCity(city),
+      topK,
+      results: [],
+      warning: 'Nenhum resultado confiavel encontrado no dataset local Recife v1 para essa busca.',
+    }
+  }
+
+  return { query, city: denormalizeCity(city), topK, results: localHits }
+}
+
+// ---------------------------------------------------------------------------
+// D1-backed retrieval
+// ---------------------------------------------------------------------------
+
+type D1ChunkRow = {
+  chunk_id: string
+  doc_id: string
+  city: string
+  title: string
+  category: string
+  region: string
+  summary: string
+  content: string
+  snippet: string
+  tags: string // JSON-encoded string
+  source: string
+  updated_at: string
+}
+
+export async function retrieveFromD1(
+  db: D1Database,
+  input: RetrieveInput,
+  context?: {
+    regionHint?: string
+    categoryHint?: RetrievalCategory
+  },
+): Promise<RetrieveResult> {
+  const query = input.query.trim()
+  const city = normalizeCity(input.city)
+  const topK = clampTopK(input.topK)
+
+  const { results: rows } = await db
+    .prepare('SELECT * FROM document_chunks WHERE lower(city) = ?')
+    .bind(city)
+    .all<D1ChunkRow>()
+
+  const chunks = rows.map((row) => ({
+    chunkId: row.chunk_id,
+    docId: row.doc_id,
+    city: row.city,
+    title: row.title,
+    category: row.category as RetrievalCategory,
+    region: row.region,
+    summary: row.summary,
+    content: row.content,
+    snippet: row.snippet,
+    tags: tryParseJsonArray(row.tags),
+    source: row.source,
+    updatedAt: row.updated_at,
+  }))
+
+  const hits = scoreAndRank({ chunks, query, topK, context })
+
+  return {
+    query,
+    city: denormalizeCity(city),
+    topK,
+    results: hits,
+    ...(hits.length === 0
+      ? { warning: 'Nenhum resultado encontrado nos datasets enviados para essa busca.' }
+      : {}),
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Shared scoring helpers
+// ---------------------------------------------------------------------------
+
+type ScoredChunk = {
+  chunkId: string
+  docId: string
+  city: string
+  title: string
+  category: RetrievalCategory
+  region: string
+  summary: string
+  content: string
+  snippet: string
+  tags: string[]
+  source: string
+  updatedAt: string
+}
+
+function scoreAndRank(params: {
+  chunks: ScoredChunk[]
+  query: string
+  topK: number
+  context?: { regionHint?: string; categoryHint?: RetrievalCategory }
+}): RetrieveHit[] {
+  const { chunks, query, topK, context } = params
+  const normalizedRegionHint = normalizeText(context?.regionHint ?? '')
   const normalizedQuery = normalizeText(query)
   const queryTokens = uniqueTokens(normalizedQuery)
 
-  const ranked = recifeV1Chunks
-    .filter((chunk) => normalizeText(chunk.city) === city)
+  return chunks
     .map((chunk) => {
       const searchable = normalizeText(
         [chunk.title, chunk.summary, chunk.snippet, chunk.tags.join(' ')].join(' '),
@@ -42,47 +152,29 @@ export function retrieveLocalRecifeV1WithContext(
     .filter((item) => item.score > 0)
     .sort((left, right) => right.score - left.score)
     .slice(0, topK)
-
-  const results: RetrieveHit[] = ranked.map(({ chunk, score }) => ({
-    chunkId: chunk.chunkId,
-    docId: chunk.docId,
-    city: chunk.city,
-    title: chunk.title,
-    category: chunk.category,
-    region: chunk.region,
-    summary: chunk.summary,
-    snippet: chunk.snippet,
-    tags: chunk.tags,
-    source: chunk.source,
-    updatedAt: chunk.updatedAt,
-    score,
-  }))
-
-  if (results.length === 0) {
-    return {
-      query,
-      city: denormalizeCity(city),
-      topK,
-      results: [],
-      warning: 'Nenhum resultado confiavel encontrado no dataset local Recife v1 para essa busca.',
-    }
-  }
-
-  return {
-    query,
-    city: denormalizeCity(city),
-    topK,
-    results,
-  }
+    .map(({ chunk, score }) => ({
+      chunkId: chunk.chunkId,
+      docId: chunk.docId,
+      city: chunk.city,
+      title: chunk.title,
+      category: chunk.category,
+      region: chunk.region,
+      summary: chunk.summary,
+      snippet: chunk.snippet,
+      tags: chunk.tags,
+      source: chunk.source,
+      updatedAt: chunk.updatedAt,
+      score,
+    }))
 }
 
 function scoreChunk(params: {
   searchable: string
   region: string
-  category: 'attraction' | 'neighborhood' | 'food_cafe' | 'logistics'
+  category: RetrievalCategory
   queryTokens: string[]
   regionHint: string
-  categoryHint?: 'attraction' | 'neighborhood' | 'food_cafe' | 'logistics'
+  categoryHint?: RetrievalCategory
 }): number {
   const { searchable, region, category, queryTokens, regionHint, categoryHint } = params
   if (queryTokens.length === 0) {
@@ -162,4 +254,13 @@ function normalizeText(value: string): string {
     .replace(/[^a-z0-9\s]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+function tryParseJsonArray(value: string): string[] {
+  try {
+    const parsed = JSON.parse(value)
+    return Array.isArray(parsed) ? (parsed as string[]) : []
+  } catch {
+    return []
+  }
 }

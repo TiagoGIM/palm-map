@@ -11,7 +11,13 @@ export type {
   RetrievalCategory,
 } from './retrieve'
 export type {
+  DatasetUploadInput,
+  DatasetUploadResult,
+  DatasetError,
+} from './dataset-upload'
+export type {
   CitySavedPlaces,
+  ConversationMessage,
   ConversationAskField,
   GroundedSuggestionItem,
   GroundedSuggestions,

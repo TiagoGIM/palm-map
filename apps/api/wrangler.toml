@@ -5,8 +5,6 @@ compatibility_date = "2026-03-20"
 [vars]
 APP_ENV = "local"
 API_ALLOWED_ORIGIN = "*"
-# Placeholder names for future data bindings
-D1_BINDING_NAME = "PALM_MAP_DB"
 VECTORIZE_BINDING_NAME = "PALM_MAP_INDEX"
 CONVERSATION_LLM_ENABLED = "false"
 CONVERSATION_LLM_BASE_URL = "https://api.openai.com/v1"
@@ -25,8 +23,6 @@ name = "palm-map-api-staging"
 [env.staging.vars]
 APP_ENV = "staging"
 API_ALLOWED_ORIGIN = "*"
-# Keep placeholders explicit for staged rollout.
-D1_BINDING_NAME = "PALM_MAP_DB"
 VECTORIZE_BINDING_NAME = "PALM_MAP_INDEX"
 CONVERSATION_LLM_ENABLED = "true"
 CONVERSATION_LLM_ACCOUNT_ID = "6806b5a345ff4dd2ce28f3943a547674"
@@ -39,12 +35,15 @@ CONVERSATION_LLM_DEBUG = "false"
 CONVERSATION_UPDATE_DEBUG = "false"
 # CONVERSATION_LLM_API_KEY is a secret — set via: wrangler secret put CONVERSATION_LLM_API_KEY --env staging
 
-# Future bindings (enable when resources exist):
-# [[env.staging.d1_databases]]
-# binding = "PALM_MAP_DB"
-# database_name = "palm-map-staging"
-# database_id = "<d1-database-id>"
-#
+# D1 session persistence + dataset chunks
+# Database created: 2026-03-29
+# Migrations applied: 001_session_state.sql, 002_document_chunks.sql
+
+[[env.staging.d1_databases]]
+binding = "PALM_MAP_DB"
+database_name = "palm-map-staging"
+database_id = "be7bc4ba-e127-4f7e-a7bd-778629c11dcf"
+
 # [[env.staging.vectorize]]
 # binding = "PALM_MAP_INDEX"
 # index_name = "palm-map-staging-index"

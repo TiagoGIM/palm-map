@@ -87,6 +87,11 @@ function extractHeuristicFromMessage(
     : message.match(
         /\b(?:para|pra|até|ate)\s+([a-zà-ÿ\s/.-]+?)(?=\s+\b(?:por|em|com|no|na|e|vou|quero|pretendo|passar|ficar|seguir)\b|[,.!?]|$)/i,
       )
+  const chegandoEm = isSavedPlaceMessage
+    ? undefined
+    : message.match(
+        /\bcheg(?:ar|ando)\s+em\s+([a-zà-ÿ]+(?:\s+[a-zà-ÿ]+){0,2}?)(?=\s+\b|[,.!?]|$)/i,
+      )
 
   const likes = extractPreferenceItems(
     message,
@@ -100,7 +105,7 @@ function extractHeuristicFromMessage(
   const stops = extractStops(message)
 
   const originCandidate = fullRoute?.[1] ?? originOnly?.[1]
-  const destinationCandidate = fullRoute?.[2] ?? destinationOnly?.[1]
+  const destinationCandidate = fullRoute?.[2] ?? destinationOnly?.[1] ?? chegandoEm?.[1]
 
   const base: ExtractedUpdate = {
     origin: originCandidate
@@ -455,8 +460,8 @@ function extractStops(message: string): ExtractedStopMention[] {
   })
 
   const stayPatterns = [
-    /\b(?:fic(?:ar|ando)|pass(?:ar|ando))\s+(\d+)\s*dias?\s+em\s+([a-zà-ÿ]+(?:\s+[a-zà-ÿ]+){0,2}?)(?=\s+(?:e\b|no\b|na\b|para\b|pra\b|até\b|ate\b)|[,.!?]|$)/gi,
-    /\b(\d+)\s*dias?\s+em\s+([a-zà-ÿ]+(?:\s+[a-zà-ÿ]+){0,2}?)(?=\s+(?:e\b|no\b|na\b|para\b|pra\b|até\b|ate\b)|[,.!?]|$)/gi,
+    /\b(?:fic(?:ar|ando)|pass(?:ar|ando))\s+(\d+)\s*dias?\s+em\s+([a-zà-ÿ]+(?:\s+[a-zà-ÿ]+){0,2}?)(?=\s+(?:e\b|no\b|na\b|para\b|pra\b|até\b|ate\b|antes\b)|[,.!?]|$)/gi,
+    /\b(\d+)\s*dias?\s+em\s+([a-zà-ÿ]+(?:\s+[a-zà-ÿ]+){0,2}?)(?=\s+(?:e\b|no\b|na\b|para\b|pra\b|até\b|ate\b|antes\b)|[,.!?]|$)/gi,
   ]
 
   stayPatterns.forEach((pattern) => {
@@ -477,6 +482,17 @@ function extractStops(message: string): ExtractedStopMention[] {
       })
     }
   })
+
+  // Variante: "passando por X N dias" (cidade antes do número)
+  const passandoPorComDias =
+    /\bpass(?:ar|ando)\s+por\s+([a-zà-ÿ]+(?:\s+[a-zà-ÿ]+){0,2}?)\s+(\d+)\s*dias?(?=\s+(?:e\b|no\b|na\b|para\b|pra\b|até\b|ate\b)|[,.!?]|$)/gi
+  for (const match of message.matchAll(passandoPorComDias)) {
+    const rawCity = match[1] ?? ''
+    const stayDays = Number(match[2])
+    const city = rawCity ? normalizeGeographicMention(rawCity) : undefined
+    if (!city || !Number.isInteger(stayDays) || stayDays < 1) continue
+    mentions.push({ city, stayDays, strongAppend: true, index: match.index ?? Number.MAX_SAFE_INTEGER })
+  }
 
   mentions.sort((a, b) => a.index - b.index)
 
@@ -514,6 +530,7 @@ export function extractDaysTotal(lowerMessage: string): number | undefined {
     /\b(?:viagem|roteiro)\s+(?:de\s+)?(\d+)\s*dias?\b/i,
     /\bquero\s+(\d+)\s*dias?\b/i,
     /\b(\d+)\s*dias?\s+de\s+viagem\b/i,
+    /\bficando\s+(\d+)\s*dias?\b/i,
   ]
 
   for (const pattern of patterns) {
@@ -608,7 +625,7 @@ function extractPace(lowerMessage: string): TripState['preferences']['pace'] {
 function extractBudget(
   lowerMessage: string,
 ): TripState['preferences']['budget'] {
-  if (/\b(econom[a-z]*|barat[a-z]*|baixo custo)\b/.test(lowerMessage)) {
+  if (/\b(econ[oô]m[a-zà-ÿ]*|barat[a-zà-ÿ]*|baixo custo)\b/.test(lowerMessage)) {
     return 'low'
   }
   if (/\b(luxo|premium|alto padrao|alto padrão)\b/.test(lowerMessage)) {

@@ -120,6 +120,18 @@ export type ConversationMeta = {
 export type ConversationTripUpdateInput = {
   message: string
   tripState?: TripState
+  /** Browser-generated UUID persisted in localStorage. Used for D1 session lookup. */
+  sessionId?: string
+}
+
+/** Single message in the conversational UI (user or assistant turn). */
+export type ConversationMessage = {
+  id: string
+  role: 'user' | 'system'
+  text: string
+  nextQuestion?: string
+  suggestedRoute?: SuggestedRoute
+  groundedSuggestions?: GroundedSuggestions
 }
 
 /** Result of a conversational update with partial state and next question. */
