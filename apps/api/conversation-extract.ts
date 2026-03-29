@@ -299,19 +299,19 @@ function extractSavedSuggestionReference(
     return undefined
   }
 
-  if (/\b(primeira|1a|1ª|1)\s+op(c|ç)ao\b/i.test(normalized)) {
+  if (/\b(primeira|1a|1ª|1)\s+op(c|ç)(ao|ão)\b/i.test(normalized)) {
     return { ordinalIndex: 0 }
   }
-  if (/\b(segunda|2a|2ª|2)\s+op(c|ç)ao\b/i.test(normalized)) {
+  if (/\b(segunda|2a|2ª|2)\s+op(c|ç)(ao|ão)\b/i.test(normalized)) {
     return { ordinalIndex: 1 }
   }
-  if (/\b(terceira|3a|3ª|3)\s+op(c|ç)ao\b/i.test(normalized)) {
+  if (/\b(terceira|3a|3ª|3)\s+op(c|ç)(ao|ão)\b/i.test(normalized)) {
     return { ordinalIndex: 2 }
   }
 
-  const numeric = normalized.match(/\bop(c|ç)ao\s+(\d+)\b/i)
-  if (numeric?.[2]) {
-    const parsed = Number(numeric[2])
+  const numeric = normalized.match(/\bop(c|ç)(ao|ão)\s+(\d+)\b/i)
+  if (numeric?.[3]) {
+    const parsed = Number(numeric[3])
     if (Number.isInteger(parsed) && parsed >= 1) {
       return { ordinalIndex: parsed - 1 }
     }

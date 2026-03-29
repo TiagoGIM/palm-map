@@ -8,11 +8,18 @@
     "dev:staging": "wrangler dev worker.ts --local --port 3001 --env staging",
     "deploy:staging": "wrangler deploy --env staging",
     "test:plan-trip-validation": "tsx --tsconfig tsconfig.node.json scripts/validate-plan-trip.ts",
-    "check:ts": "tsx --tsconfig tsconfig.node.json --check scripts/validate-plan-trip.ts"
+    "check:ts": "tsx --tsconfig tsconfig.node.json --check scripts/validate-plan-trip.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:scenarios": "tsx --tsconfig tsconfig.node.json scripts/compare-extraction.ts",
+    "test:scenarios:llm": "tsx --tsconfig tsconfig.node.json scripts/compare-extraction.ts --llm"
   },
   "devDependencies": {
     "@types/node": "25.5.0",
+    "@vitest/coverage-v8": "^2.1.9",
     "tsx": "^4.21.0",
+    "vitest": "^2.1.9",
     "wrangler": "^4.41.0"
   }
 }

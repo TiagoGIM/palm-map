@@ -7,6 +7,15 @@ export type ConversationLlmEnv = {
   CONVERSATION_LLM_BASE_URL?: string
   CONVERSATION_LLM_MODEL?: string
   CONVERSATION_LLM_TIMEOUT_MS?: string
+  /** Cloudflare account ID. When set, overrides BASE_URL to Cloudflare Workers AI endpoint. */
+  CONVERSATION_LLM_ACCOUNT_ID?: string
+  /**
+   * Response format mode:
+   * - "json_schema" (default): OpenAI strict structured output — enforces schema server-side.
+   * - "json_object": JSON free-form — compatible with Cloudflare Workers AI and other providers.
+   *   Schema is described inside the system prompt instead.
+   */
+  CONVERSATION_LLM_RESPONSE_MODE?: 'json_schema' | 'json_object'
 }
 
 export type LlmStructuredStop = {
@@ -91,11 +100,10 @@ export async function extractStructuredWithLlm(params: {
     return { ok: false, reason: 'missing_api_key' }
   }
 
-  const baseUrl =
-    params.env.CONVERSATION_LLM_BASE_URL?.trim() ??
-    'https://api.openai.com/v1'
+  const baseUrl = resolveBaseUrl(params.env)
   const model = params.env.CONVERSATION_LLM_MODEL?.trim() ?? 'gpt-4.1-mini'
   const timeoutMs = parseTimeoutMs(params.env.CONVERSATION_LLM_TIMEOUT_MS)
+  const responseMode = params.env.CONVERSATION_LLM_RESPONSE_MODE ?? 'json_schema'
 
   let responseBody: unknown
 
@@ -105,6 +113,7 @@ export async function extractStructuredWithLlm(params: {
       apiKey,
       model,
       timeoutMs,
+      responseMode,
       message: params.message,
       tripState: params.tripState,
     })
@@ -135,6 +144,14 @@ function isLlmEnabled(env: ConversationLlmEnv): boolean {
   return (env.CONVERSATION_LLM_ENABLED ?? '').toLowerCase() === 'true'
 }
 
+function resolveBaseUrl(env: ConversationLlmEnv): string {
+  const accountId = env.CONVERSATION_LLM_ACCOUNT_ID?.trim()
+  if (accountId) {
+    return `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/v1`
+  }
+  return env.CONVERSATION_LLM_BASE_URL?.trim() ?? 'https://api.openai.com/v1'
+}
+
 function parseTimeoutMs(raw?: string): number {
   const parsed = Number(raw ?? '')
   if (Number.isInteger(parsed) && parsed >= 500 && parsed <= 30_000) {
@@ -143,43 +160,49 @@ function parseTimeoutMs(raw?: string): number {
   return 5_000
 }
 
+type ResponseMode = 'json_schema' | 'json_object'
+
 async function callChatCompletions(params: {
   baseUrl: string
   apiKey: string
   model: string
   timeoutMs: number
+  responseMode: ResponseMode
   message: string
   tripState: TripState
 }): Promise<unknown> {
   const endpoint = `${params.baseUrl.replace(/\/$/, '')}/chat/completions`
-  const body = {
-    model: params.model,
-    temperature: 0,
-    response_format: {
+
+  const messages = [
+    {
+      role: 'system',
+      content: buildSystemPrompt(params.responseMode),
+    },
+    {
+      role: 'user',
+      content: JSON.stringify(
+        {
+          message: params.message,
+          currentTripState: params.tripState,
+        },
+        null,
+        2,
+      ),
+    },
+  ]
+
+  // Cloudflare Workers AI does not support response_format via the OpenAI-compatible endpoint.
+  // In json_object mode, the schema is described in the system prompt instead.
+  const body: Record<string, unknown> = { model: params.model, temperature: 0, messages }
+  if (params.responseMode !== 'json_object') {
+    body['response_format'] = {
       type: 'json_schema',
       json_schema: {
         name: 'conversation_trip_extraction',
         strict: true,
         schema: EXTRACTION_JSON_SCHEMA,
       },
-    },
-    messages: [
-      {
-        role: 'system',
-        content: buildSystemPrompt(),
-      },
-      {
-        role: 'user',
-        content: JSON.stringify(
-          {
-            message: params.message,
-            currentTripState: params.tripState,
-          },
-          null,
-          2,
-        ),
-      },
-    ],
+    }
   }
 
   const controller = new AbortController()
@@ -206,18 +229,38 @@ async function callChatCompletions(params: {
   }
 }
 
-function buildSystemPrompt(): string {
-  return [
-    'You extract structured travel-state updates.',
-    'Return ONLY valid JSON that matches the provided schema.',
+function buildSystemPrompt(responseMode: ResponseMode = 'json_schema'): string {
+  const base = [
+    'You extract structured travel-state updates from user messages in Portuguese or English.',
+    'IMPORTANT: Your response must ALWAYS be a single valid JSON object, nothing else.',
+    'Never write prose. Never explain. Never add any text outside the JSON.',
     'Do not invent cities, dates, stops, or durations.',
     'Use only explicit user information from the message.',
-    'stops must include only intermediate cities, never origin or destination.',
+    'stops are intermediate cities visited before reaching the final destination (e.g. "passar N dias em X antes de chegar em Y" → stop=X, destination=Y).',
+    'stops must never include origin or destination.',
     'If a field is unknown, omit it.',
     'If no likes/dislikes/stops were found, return empty arrays for them.',
     'possibleMissingField should indicate the next missing required field among origin, destination, daysTotal when applicable.',
     'confidence should reflect extraction confidence from 0 to 1.',
-  ].join(' ')
+    'If currentTripState.conversationMeta.lastAskedField is set and the message is a short reply (city name, number, etc.), interpret it as the answer to that field.',
+    'Pace mapping: "tranquilo/tranquila/calmo/devagar/lento" = "slow"; "moderado/normal" = "moderate"; "rapido/agitado/intenso" = "fast".',
+    'Budget mapping: "economico/economica/barato/barata/low cost/budget" = "low"; "medio/moderado" = "medium"; "luxo/caro/cara/premium/high end" = "high".',
+  ]
+
+  if (responseMode === 'json_object') {
+    base.push(
+      'Your response must be a JSON object with these optional fields:',
+      'origin (string), destination (string), daysTotal (integer >= 1),',
+      'stops (array of {city: string, stayDays?: integer}),',
+      'likes (string[]), dislikes (string[]),',
+      'pace ("slow"|"moderate"|"fast"), budget ("low"|"medium"|"high"),',
+      'possibleMissingField ("origin"|"destination"|"daysTotal"),',
+      'confidence (number 0-1), nextQuestion (string).',
+      'Required: stops, likes, dislikes (use empty arrays if none found).',
+    )
+  }
+
+  return base.join(' ')
 }
 
 function parseLlmJsonPayload(value: unknown): unknown | null {
@@ -269,13 +312,9 @@ function normalizeLlmExtraction(value: unknown): LlmStructuredExtraction | null 
   const origin = normalizeOptionalPlace(value.origin)
   const destination = normalizeOptionalPlace(value.destination)
   const daysTotal = normalizeOptionalPositiveInteger(value.daysTotal)
-  const likes = normalizeStringArray(value.likes)
-  const dislikes = normalizeStringArray(value.dislikes)
-  const stops = normalizeStops(value.stops)
-
-  if (!likes || !dislikes || !stops) {
-    return null
-  }
+  const likes = normalizeStringArray(value.likes) ?? []
+  const dislikes = normalizeStringArray(value.dislikes) ?? []
+  const stops = normalizeStops(value.stops) ?? []
 
   const pace = normalizeEnum(value.pace, ['slow', 'moderate', 'fast'])
   const budget = normalizeEnum(value.budget, ['low', 'medium', 'high'])

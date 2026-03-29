@@ -15,6 +15,9 @@ CONVERSATION_LLM_TIMEOUT_MS = "5000"
 CONVERSATION_LLM_DEBUG = "false"
 CONVERSATION_LLM_MIN_CONFIDENCE = "0.45"
 CONVERSATION_UPDATE_DEBUG = "false"
+# Cloudflare Workers AI: set ACCOUNT_ID + API_KEY + RESPONSE_MODE=json_object + MODEL=@cf/meta/llama-3.1-8b-instruct
+CONVERSATION_LLM_ACCOUNT_ID = ""
+CONVERSATION_LLM_RESPONSE_MODE = "json_schema"
 
 [env.staging]
 name = "palm-map-api-staging"
@@ -25,13 +28,16 @@ API_ALLOWED_ORIGIN = "*"
 # Keep placeholders explicit for staged rollout.
 D1_BINDING_NAME = "PALM_MAP_DB"
 VECTORIZE_BINDING_NAME = "PALM_MAP_INDEX"
-CONVERSATION_LLM_ENABLED = "false"
-CONVERSATION_LLM_BASE_URL = "https://api.openai.com/v1"
-CONVERSATION_LLM_MODEL = "gpt-4.1-mini"
-CONVERSATION_LLM_TIMEOUT_MS = "5000"
+CONVERSATION_LLM_ENABLED = "true"
+CONVERSATION_LLM_ACCOUNT_ID = "6806b5a345ff4dd2ce28f3943a547674"
+CONVERSATION_LLM_BASE_URL = "https://api.cloudflare.com/client/v4/accounts/6806b5a345ff4dd2ce28f3943a547674/ai/v1"
+CONVERSATION_LLM_MODEL = "@cf/meta/llama-3.1-8b-instruct"
+CONVERSATION_LLM_RESPONSE_MODE = "json_object"
+CONVERSATION_LLM_TIMEOUT_MS = "15000"
+CONVERSATION_LLM_MIN_CONFIDENCE = "0.3"
 CONVERSATION_LLM_DEBUG = "false"
-CONVERSATION_LLM_MIN_CONFIDENCE = "0.45"
 CONVERSATION_UPDATE_DEBUG = "false"
+# CONVERSATION_LLM_API_KEY is a secret — set via: wrangler secret put CONVERSATION_LLM_API_KEY --env staging
 
 # Future bindings (enable when resources exist):
 # [[env.staging.d1_databases]]
