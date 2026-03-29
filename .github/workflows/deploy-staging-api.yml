@@ -16,6 +16,7 @@ on:
 jobs:
   deploy-staging:
     runs-on: ubuntu-latest
+    environment: STAGING_API_BASE_URL
     permissions:
       contents: read
     env:
