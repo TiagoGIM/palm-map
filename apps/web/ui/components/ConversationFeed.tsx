@@ -6,7 +6,7 @@ import { Card } from '../primitives/Card'
 type Props = {
   messages: ConversationMessage[]
   isSubmitting: boolean
-  scrollRef: RefObject<HTMLElement | null>
+  scrollRef: RefObject<HTMLElement>
   onSaveSuggestion: (rank: number) => void
 }
 
