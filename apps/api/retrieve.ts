@@ -91,7 +91,7 @@ function mergeResults(
     topK,
     results,
     ...(results.length === 0
-      ? { warning: local.warning ?? d1.warning }
+      ? { warning: d1.warning ?? local.warning }
       : {}),
   }
 }

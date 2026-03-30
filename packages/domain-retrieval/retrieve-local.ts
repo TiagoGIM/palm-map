@@ -69,12 +69,20 @@ export async function retrieveFromD1(
 ): Promise<RetrieveResult> {
   const query = input.query.trim()
   const city = normalizeCity(input.city)
+  const rawLowerCity = input.city.trim().toLowerCase()
   const topK = clampTopK(input.topK)
 
-  const { results: rows } = await db
+  let { results: rows } = await db
     .prepare('SELECT * FROM document_chunks WHERE lower(city) = ?')
-    .bind(city)
+    .bind(rawLowerCity)
     .all<D1ChunkRow>()
+
+  if (rows.length === 0) {
+    const { results: allRows } = await db
+      .prepare('SELECT * FROM document_chunks')
+      .all<D1ChunkRow>()
+    rows = allRows.filter((row) => normalizeCity(row.city) === city)
+  }
 
   const chunks = rows.map((row) => ({
     chunkId: row.chunk_id,
