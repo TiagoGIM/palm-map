@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
+import type { GroundedSuggestions } from '../../../packages/shared-types'
 import {
   computeUnresolvedFields,
   deriveConversationStage,
@@ -242,14 +243,14 @@ describe('buildTripLegs', () => {
 // ---------------------------------------------------------------------------
 describe('buildSuggestionsAssistantMessage', () => {
   it('formata até 3 sugestões corretamente', () => {
-    const suggestions = {
+    const suggestions: GroundedSuggestions = {
       city: 'Recife',
       query: 'praias',
       topK: 3,
       items: [
-        { rank: 1, title: 'Praia de Boa Viagem', region: 'Zona Sul', category: 'praia', source: 'manual', score: 0.9, docId: 'd1', chunkId: 'c1', city: 'Recife' },
-        { rank: 2, title: 'Praia do Pina', region: 'Zona Sul', category: 'praia', source: 'manual', score: 0.8, docId: 'd2', chunkId: 'c2', city: 'Recife' },
-        { rank: 3, title: 'Piscinas de Gaibu', region: 'Cabo', category: 'praia', source: 'manual', score: 0.7, docId: 'd3', chunkId: 'c3', city: 'Recife' },
+        { rank: 1, title: 'Praia de Boa Viagem', region: 'Zona Sul', category: 'attraction', summary: 'Praia urbana de Recife.', source: 'manual', score: 0.9, docId: 'd1', chunkId: 'c1', city: 'Recife' },
+        { rank: 2, title: 'Praia do Pina', region: 'Zona Sul', category: 'attraction', summary: 'Praia tranquila no Pina.', source: 'manual', score: 0.8, docId: 'd2', chunkId: 'c2', city: 'Recife' },
+        { rank: 3, title: 'Piscinas de Gaibu', region: 'Cabo', category: 'attraction', summary: 'Piscinas naturais em Gaibu.', source: 'manual', score: 0.7, docId: 'd3', chunkId: 'c3', city: 'Recife' },
       ],
     }
     const message = buildSuggestionsAssistantMessage(suggestions)
@@ -260,15 +261,15 @@ describe('buildSuggestionsAssistantMessage', () => {
   })
 
   it('ignora itens além dos 3 primeiros', () => {
-    const suggestions = {
+    const suggestions: GroundedSuggestions = {
       city: 'Recife',
       query: 'tudo',
       topK: 5,
       items: [
-        { rank: 1, title: 'A', region: 'X', category: 'c', source: 'manual', score: 1, docId: 'd1', chunkId: 'c1', city: 'Recife' },
-        { rank: 2, title: 'B', region: 'X', category: 'c', source: 'manual', score: 0.9, docId: 'd2', chunkId: 'c2', city: 'Recife' },
-        { rank: 3, title: 'C', region: 'X', category: 'c', source: 'manual', score: 0.8, docId: 'd3', chunkId: 'c3', city: 'Recife' },
-        { rank: 4, title: 'D', region: 'X', category: 'c', source: 'manual', score: 0.7, docId: 'd4', chunkId: 'c4', city: 'Recife' },
+        { rank: 1, title: 'A', region: 'X', category: 'attraction', summary: 'Lugar A.', source: 'manual', score: 1, docId: 'd1', chunkId: 'c1', city: 'Recife' },
+        { rank: 2, title: 'B', region: 'X', category: 'attraction', summary: 'Lugar B.', source: 'manual', score: 0.9, docId: 'd2', chunkId: 'c2', city: 'Recife' },
+        { rank: 3, title: 'C', region: 'X', category: 'attraction', summary: 'Lugar C.', source: 'manual', score: 0.8, docId: 'd3', chunkId: 'c3', city: 'Recife' },
+        { rank: 4, title: 'D', region: 'X', category: 'attraction', summary: 'Lugar D.', source: 'manual', score: 0.7, docId: 'd4', chunkId: 'c4', city: 'Recife' },
       ],
     }
     const message = buildSuggestionsAssistantMessage(suggestions)

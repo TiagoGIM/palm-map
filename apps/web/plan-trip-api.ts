@@ -1,4 +1,5 @@
 import type { PlanTripInput, PlanTripResult } from '../../packages/shared-types'
+import { getAuthHeaders } from './api/session-token'
 
 type PlanTripApiError = {
   error: {
@@ -16,6 +17,7 @@ export async function requestPlanTrip(
     method: 'POST',
     headers: {
       'content-type': 'application/json',
+      ...getAuthHeaders(),
     },
     body: JSON.stringify(input),
   })

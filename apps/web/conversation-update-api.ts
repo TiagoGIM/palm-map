@@ -2,6 +2,7 @@ import type {
   ConversationTripUpdateInput,
   ConversationTripUpdateResult,
 } from '../../packages/shared-types'
+import { getAuthHeaders } from './api/session-token'
 
 type ConversationApiError = {
   error: {
@@ -19,6 +20,7 @@ export async function requestConversationUpdate(
     method: 'POST',
     headers: {
       'content-type': 'application/json',
+      ...getAuthHeaders(),
     },
     body: JSON.stringify(input),
   })

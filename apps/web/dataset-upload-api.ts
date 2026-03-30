@@ -1,4 +1,5 @@
 import type { DatasetUploadInput, DatasetUploadResult } from '../../packages/shared-types'
+import { getAuthHeaders } from './api/session-token'
 
 type DatasetApiError = {
   error: {
@@ -16,6 +17,7 @@ export async function requestDatasetUpload(
     method: 'POST',
     headers: {
       'content-type': 'application/json',
+      ...getAuthHeaders(),
     },
     body: JSON.stringify(input),
   })

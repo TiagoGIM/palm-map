@@ -3,6 +3,7 @@ import { handleDatasetUpload } from './dataset-upload'
 import { handlePlanTrip } from './plan-trip'
 import { handleRetrieve } from './retrieve'
 import type { D1Database } from '../../packages/domain-memory'
+import { requireSessionToken } from './session-token'
 
 type WorkerEnv = {
   APP_ENV?: string
@@ -23,7 +24,7 @@ type WorkerEnv = {
 const CORS_HEADERS = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'POST, OPTIONS',
-  'access-control-allow-headers': 'content-type',
+  'access-control-allow-headers': 'content-type, x-palm-session-token',
 }
 
 export default {
@@ -65,6 +66,11 @@ export default {
         404,
         corsHeaders,
       )
+    }
+
+    const tokenResponse = requireSessionToken(request, corsHeaders)
+    if (tokenResponse) {
+      return tokenResponse
     }
 
     const requestBody = await parseJsonBody(request)

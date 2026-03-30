@@ -27,5 +27,4 @@
 
 ## Trade-offs aceitos (MVP)
 
-- **CORS wildcard** (`API_ALLOWED_ORIGIN = "*"`): API publica por design — nao ha sessao autenticada.
-- **`/dataset/upload` sem autenticacao**: Aceitavel em staging privado. Antes de ir para producao, proteger o endpoint com um shared secret (header `X-Upload-Key`) ou restringir por IP/origin.
+- **CORS wildcard** (`API_ALLOWED_ORIGIN = "*"`): API publica por design, mas todas as rotas POST exigem o header `X-Palm-Session-Token` para limitar quem consegue acessar o serviço.

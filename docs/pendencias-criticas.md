@@ -28,8 +28,7 @@ verifique se os itens abaixo foram resolvidos ou conscientemente adiados.
 
 Estes itens **devem** ser resolvidos antes de qualquer exposição pública da API:
 
-- **`/dataset/upload` sem autenticação**: proteger com shared secret (header `X-Upload-Key`)
-  ou restrição de origin. Documentado em `apps/api/AGENTS.md`.
+- **Token de sessão obrigatório**: o worker exige `X-Palm-Session-Token` em todas as rotas POST e o TokenGate no frontend precisa salvar esse valor antes que qualquer chamada seja feita. Consulte `docs/decisions/2026-03-31-session-token-gate.md` para gerar e distribuir o token nos ambientes.
 
 - **Avaliação de qualidade do retrieval**: as 20–30 queries previstas na ADR 002 nunca foram
   executadas. Não sabemos se o retrieval text-match em D1 tem qualidade suficiente para suportar

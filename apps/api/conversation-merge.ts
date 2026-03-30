@@ -1,7 +1,6 @@
-import type { CitySavedPlaces, ConversationFocusField, TripState } from '../../packages/shared-types'
+import type { CitySavedPlaces, ConversationAskField, ConversationFocusField, TripState } from '../../packages/shared-types'
 import { normalizeCity } from './conversation-city-utils'
 import {
-  type ConversationAskField,
   type ExtractedUpdate,
   type MissingField,
 } from './conversation-types'

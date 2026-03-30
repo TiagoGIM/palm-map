@@ -1,6 +1,6 @@
 
 import { handlePlanTrip } from '../plan-trip'
-import type { PlanTripInput } from '../../packages/shared-types/plan-trip.ts'
+import type { PlanTripInput } from '../../../packages/shared-types'
 
 type PlanTripScenario = {
   name: string
@@ -19,6 +19,9 @@ const scenarios: PlanTripScenario[] = [
       destination: 'Recife',
       days: 2,
       tripState: {
+        stops: [],
+        savedPlacesByCity: [],
+        preferences: { likes: [], dislikes: [] },
         conversationMeta: {
           lastSuggestions: [
             {
