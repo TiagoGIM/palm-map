@@ -13,7 +13,9 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:scenarios": "tsx --tsconfig tsconfig.node.json scripts/compare-extraction.ts",
-    "test:scenarios:llm": "tsx --tsconfig tsconfig.node.json scripts/compare-extraction.ts --llm"
+    "test:scenarios:llm": "tsx --tsconfig tsconfig.node.json scripts/compare-extraction.ts --llm",
+    "test:retrieval-eval": "tsx --tsconfig tsconfig.node.json scripts/evaluate-retrieval.ts",
+    "test:retrieval-eval:curl": "tsx --tsconfig tsconfig.node.json scripts/evaluate-retrieval.ts --print-curl"
   },
   "devDependencies": {
     "@types/node": "25.5.0",

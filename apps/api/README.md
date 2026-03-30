@@ -145,6 +145,14 @@ O script roda dois cenários: um com `tripState.conversationMeta.lastSuggestions
 
 Scripts dentro de `apps/api/scripts` herdam `tsconfig.json` (para a Worker) e `tsconfig.node.json` (para os scripts). Execute `pnpm --dir apps/api test:plan-trip-validation` para rodar `tsx -p tsconfig.node.json scripts/validate-plan-trip.ts` e `pnpm --dir apps/api check:ts` para `tsx -p tsconfig.node.json --check scripts/validate-plan-trip.ts`. O runtime bundler/NodeNext permite imports diretos sem `pathToFileURL`.
 
+Avaliação de retrieval (staging):
+- configure `apps/api/.env.test.local` com:
+  - `PALM_SESSION_TOKEN=<token>`
+  - `STAGING_API_BASE_URL=https://palm-map-api-staging.thsa-dev.workers.dev` (ou `RETRIEVAL_API_BASE_URL`)
+- rode `pnpm --dir apps/api test:retrieval-eval`
+- opcional: `pnpm --dir apps/api test:retrieval-eval:curl` para imprimir um `curl` de exemplo já com token.
+- o relatório é salvo em `docs/retrieval-eval/latest-report.md`
+
 Exemplo de resposta conversacional:
 
 ```json
