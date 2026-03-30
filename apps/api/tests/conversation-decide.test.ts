@@ -333,6 +333,21 @@ describe('chooseNextQuestion', () => {
     expect(result.nextQuestion).toBeUndefined()
   })
 
+  it('quando completa os campos obrigatorios, sugere o proximo passo', () => {
+    const previousState = partialTripState()
+    const nextState = partialTripState({ daysTotal: 10 })
+    const result = chooseNextQuestion({
+      previousState,
+      nextState,
+      extracted: emptyExtractedUpdate({ daysTotal: 10 }),
+      userMessage: 'vou ficar 10 dias',
+      groundedResolution: noGroundedResolution,
+    })
+    expect(result.askedField).toBeUndefined()
+    expect(result.nextQuestion).toBeUndefined()
+    expect(result.assistantMessage).toContain('Quer que eu te traga sugestoes')
+  })
+
   it('origin === destination → pergunta destination de novo', () => {
     const state = {
       ...partialTripState(),

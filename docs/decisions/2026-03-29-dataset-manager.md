@@ -73,7 +73,12 @@ wrangler d1 execute palm-map-staging \
 
 ## Fora de escopo (futuro)
 
-- Autenticação no endpoint (toda API é pública no MVP)
+- Autenticação avançada por usuário/perfil (o gate atual valida somente token de sessão compartilhado)
 - UI de listagem/remoção de datasets
 - Integração com Vectorize/embeddings semânticos
 - Rate limiting
+
+## Atualização 2026-03-30
+
+- O endpoint de upload segue público no sentido de não ter login, mas agora exige `X-Palm-Session-Token` validado no Worker contra `PALM_SESSION_TOKEN`.
+- O Dataset Manager Web usa o mesmo TokenGate do app para enviar esse header em todas as chamadas.

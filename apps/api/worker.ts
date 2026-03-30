@@ -8,6 +8,7 @@ import { requireSessionToken } from './session-token'
 type WorkerEnv = {
   APP_ENV?: string
   API_ALLOWED_ORIGIN?: string
+  PALM_SESSION_TOKEN?: string
   VECTORIZE_BINDING_NAME?: string
   CONVERSATION_LLM_ENABLED?: string
   CONVERSATION_LLM_API_KEY?: string
@@ -68,7 +69,11 @@ export default {
       )
     }
 
-    const tokenResponse = requireSessionToken(request, corsHeaders)
+    const tokenResponse = requireSessionToken(
+      request,
+      corsHeaders,
+      env.PALM_SESSION_TOKEN,
+    )
     if (tokenResponse) {
       return tokenResponse
     }

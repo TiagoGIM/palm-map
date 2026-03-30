@@ -7,20 +7,19 @@ verifique se os itens abaixo foram resolvidos ou conscientemente adiados.
 
 ## Em andamento
 
-- Fix CI deploy do Cloudflare Pages (web) — `VITE_API_BASE_URL` vazia no build de staging
+- Validar em staging a rotação de `PALM_SESSION_TOKEN` (secret no Worker + atualização manual no TokenGate)
 
 ---
 
 ## Técnico urgente
 
-- **Erros de TypeScript pré-existentes**
-  - `conversation-merge.ts` importa `ConversationAskField` que não existe no módulo `conversation-types`
-  - Fixtures de teste (`conversation-decide.test.ts`) usando `GroundedSuggestionItem` sem campo `summary` obrigatório
-  - Esses erros não quebram os testes nem o runtime, mas vão bloquear um build estrito futuro
+- **Validação forte de sessão no backend**
+  - O Worker agora compara `X-Palm-Session-Token` com `PALM_SESSION_TOKEN` e rejeita token ausente/inválido.
+  - Precisamos manter o secret configurado em todos os ambientes de runtime da API para evitar `503 session_token_unconfigured`.
 
-- **Commit pendente**: alterações da revisão de risco (Eixos 1–3) ainda não commitadas
-  - Arquivos: `conversation-update.ts`, `retrieve.ts`, `dataset-upload.ts`, `dataset-upload-api.ts`,
-    `conversation-update-api.ts`, `useConversation.ts`, `DatasetManagerSheet.tsx`, `AGENTS.md`
+- **Continuidade da conversa quando estado fica completo**
+  - O fluxo agora faz prompt pró-ativo de próximo passo quando origem/destino/duração ficam completos.
+  - Monitorar em staging se isso elimina os casos de “chat parado” após coletar os campos essenciais.
 
 ---
 
@@ -28,7 +27,7 @@ verifique se os itens abaixo foram resolvidos ou conscientemente adiados.
 
 Estes itens **devem** ser resolvidos antes de qualquer exposição pública da API:
 
-- **Token de sessão obrigatório**: o worker exige `X-Palm-Session-Token` em todas as rotas POST e o TokenGate no frontend precisa salvar esse valor antes que qualquer chamada seja feita. Consulte `docs/decisions/2026-03-31-session-token-gate.md` para gerar e distribuir o token nos ambientes.
+- **Token de sessão obrigatório**: o worker exige `X-Palm-Session-Token` em todas as rotas POST e valida contra `PALM_SESSION_TOKEN` do ambiente. O TokenGate no frontend precisa salvar esse valor antes de qualquer chamada. Consulte `docs/decisions/2026-03-31-session-token-gate.md` para rotação/distribuição.
 
 - **Avaliação de qualidade do retrieval**: as 20–30 queries previstas na ADR 002 nunca foram
   executadas. Não sabemos se o retrieval text-match em D1 tem qualidade suficiente para suportar
@@ -43,7 +42,7 @@ Não implementar sem revisão explícita:
 | Item | Razão para adiar |
 |---|---|
 | Vectorize (embeddings semânticos) | Text-match em D1 é suficiente para o volume atual |
-| CORS restrito | API pública por design, sem sessão autenticada |
+| CORS restrito | API pública por design; proteção atual fica no token de sessão do Worker |
 | Retry com backoff no LLM | Melhoria futura, não um bug |
 | Multi-cidade além de Recife | Dataset limitado; expandir via Dataset Manager |
 | Replanning durante a viagem | Fora do escopo do conversational MVP |

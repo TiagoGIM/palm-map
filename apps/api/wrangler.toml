@@ -34,6 +34,7 @@ CONVERSATION_LLM_MIN_CONFIDENCE = "0.3"
 CONVERSATION_LLM_DEBUG = "false"
 CONVERSATION_UPDATE_DEBUG = "false"
 # CONVERSATION_LLM_API_KEY is a secret — set via: wrangler secret put CONVERSATION_LLM_API_KEY --env staging
+# PALM_SESSION_TOKEN is a secret — set via: wrangler secret put PALM_SESSION_TOKEN --env staging
 
 # D1 session persistence + dataset chunks
 # Database created: 2026-03-29

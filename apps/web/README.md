@@ -91,7 +91,7 @@ Como validar local e staging:
    - subir API: `pnpm --dir apps/api dev`
    - subir web: `pnpm --dir apps/web dev`
 2. Local web contra API staging:
-   - criar `apps/web/.env.local` com `VITE_API_BASE_URL=<url-da-api-staging>`
+   - criar `apps/web/.env.local` com `VITE_API_BASE_URL=https://<url-da-api-staging>`
    - subir web: `pnpm --dir apps/web dev`
 3. Deploy staging no CI:
    - configurar secrets:

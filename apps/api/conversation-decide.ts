@@ -85,11 +85,21 @@ export function chooseNextQuestion(params: {
   }
 
   const unresolvedFields = computeUnresolvedFields(params.nextState)
+  const previousUnresolvedFields = computeUnresolvedFields(params.previousState)
   const candidateField =
     getNextCandidateField(params.nextState, unresolvedFields) ??
     (params.extracted.llmPossibleMissingField as ConversationAskField | undefined)
 
   if (!candidateField) {
+    if (
+      unresolvedFields.length === 0 &&
+      previousUnresolvedFields.length > 0 &&
+      !params.extracted.suggestionIntent
+    ) {
+      return {
+        assistantMessage: buildReadyToSuggestMessage(params.nextState),
+      }
+    }
     return {}
   }
 
@@ -477,6 +487,13 @@ function buildSavedPlacesListMessage(
 
   const places = cityEntry.places.map((place) => place.placeName).join(', ')
   return `Lugares salvos em ${city}: ${places}.`
+}
+
+function buildReadyToSuggestMessage(tripState: TripState): string {
+  if (tripState.destination) {
+    return `Perfeito, ja tenho os dados principais da viagem para ${tripState.destination}. Quer que eu te traga sugestoes de lugares agora?`
+  }
+  return 'Perfeito, ja tenho os dados principais da viagem. Quer que eu te traga sugestoes de lugares agora?'
 }
 
 function getQuestionByMissingField(

@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted (com adendo de execução em 2026-03-30)
 
 ## Contexto
 
@@ -22,6 +22,12 @@ A próxima fase precisa:
 - manter custo inicial o mais próximo possível de zero
 
 Também queremos estruturar a base de CI/CD e runtime de forma compatível com free tiers, priorizando simplicidade operacional e baixo custo.
+
+## Status atual da implementação (2026-03-30)
+
+- O retrieval em uso no MVP está em `text-match` com base local + D1 (`retrieve-local` + `document_chunks`).
+- O endpoint `POST /retrieve` existe e alimenta o fluxo conversacional.
+- O alvo `Vectorize + D1` desta ADR permanece como direção arquitetural, mas foi adiado para não expandir escopo antes da validação do MVP conversacional.
 
 ## Decisão
 
@@ -131,6 +137,14 @@ O staging passa a ser o ambiente oficial de validação integrada do RAG.
 - O pipeline de ingestão exige mais disciplina desde cedo
 - O ambiente de staging deixa de ser apenas deploy do scaffold e passa a carregar infra mínima de dados
 - Alguns limites de free tier podem exigir ajustes futuros em volume, frequência de ingestão ou avaliação automatizada
+
+## Adendo de roadmap (2026-03-30)
+
+- Decisão operacional da fase atual: **manter text-match + D1 no MVP** para reduzir risco e custo.
+- A migração para Vectorize volta ao roadmap somente após:
+  1) avaliação manual de qualidade do retrieval atual,
+  2) confirmação de gargalo real de relevância/latência,
+  3) janela de execução dedicada para ingest + índice vetorial.
 
 ## Fora de escopo agora
 

@@ -60,10 +60,21 @@ Endpoint local:
 - `POST http://localhost:3001/retrieve`
 - compativel tambem com `POST http://localhost:3001/api/retrieve`
 
+Autenticacao de sessao (obrigatoria):
+- todas as rotas `POST` exigem o header `X-Palm-Session-Token`
+- o Worker valida o header contra o secret `PALM_SESSION_TOKEN`
+- sem secret configurado no runtime, o Worker responde `503 session_token_unconfigured`
+
 Exemplos de teste rapido:
 
 ```bash
+export PALM_TOKEN="<seu-token>"
+# inclua sempre: -H "x-palm-session-token: ${PALM_TOKEN}"
+```
+
+```bash
 curl -sS -X POST http://localhost:3001/plan-trip \
+  -H "x-palm-session-token: ${PALM_TOKEN}" \
   -H 'content-type: application/json' \
   -d '{"origin":"Fortaleza","destination":"Recife","days":3,"preferencesText":"praia"}'
 ```
