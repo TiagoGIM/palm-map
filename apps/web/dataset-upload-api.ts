@@ -1,5 +1,6 @@
 import type { DatasetUploadInput, DatasetUploadResult } from '../../packages/shared-types'
 import { getAuthHeaders } from './api/session-token'
+import { resolveApiUrl } from './api/resolve-api-url'
 
 type DatasetApiError = {
   error: {
@@ -8,12 +9,10 @@ type DatasetApiError = {
   }
 }
 
-const ENV_API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.trim()
-
 export async function requestDatasetUpload(
   input: DatasetUploadInput,
 ): Promise<DatasetUploadResult> {
-  const response = await fetch(resolveDatasetUploadUrl(), {
+  const response = await fetch(resolveApiUrl('/dataset/upload'), {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
@@ -32,28 +31,4 @@ export async function requestDatasetUpload(
   }
 
   return (await response.json()) as DatasetUploadResult
-}
-
-function resolveDatasetUploadUrl(): string {
-  if (ENV_API_BASE_URL) {
-    const normalizedBase = ENV_API_BASE_URL.replace(/\/+$/, '')
-    return `${normalizedBase}/dataset/upload`
-  }
-
-  if (isLocalWebEnvironment()) {
-    return '/api/dataset/upload'
-  }
-
-  throw new Error(
-    'VITE_API_BASE_URL nao configurado para ambiente publicado.',
-  )
-}
-
-function isLocalWebEnvironment(): boolean {
-  if (typeof window === 'undefined') {
-    return false
-  }
-
-  const hostname = window.location.hostname
-  return hostname === 'localhost' || hostname === '127.0.0.1'
 }

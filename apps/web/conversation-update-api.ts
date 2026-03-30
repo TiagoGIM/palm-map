@@ -3,6 +3,7 @@ import type {
   ConversationTripUpdateResult,
 } from '../../packages/shared-types'
 import { getAuthHeaders } from './api/session-token'
+import { resolveApiUrl } from './api/resolve-api-url'
 
 type ConversationApiError = {
   error: {
@@ -11,12 +12,10 @@ type ConversationApiError = {
   }
 }
 
-const ENV_API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.trim()
-
 export async function requestConversationUpdate(
   input: ConversationTripUpdateInput,
 ): Promise<ConversationTripUpdateResult> {
-  const response = await fetch(resolveConversationUpdateUrl(), {
+  const response = await fetch(resolveApiUrl('/conversation/update'), {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
@@ -35,28 +34,4 @@ export async function requestConversationUpdate(
   }
 
   return (await response.json()) as ConversationTripUpdateResult
-}
-
-function resolveConversationUpdateUrl(): string {
-  if (ENV_API_BASE_URL) {
-    const normalizedBase = ENV_API_BASE_URL.replace(/\/+$/, '')
-    return `${normalizedBase}/conversation/update`
-  }
-
-  if (isLocalWebEnvironment()) {
-    return '/api/conversation/update'
-  }
-
-  throw new Error(
-    'VITE_API_BASE_URL nao configurado para ambiente publicado. Defina a URL publica da API no build do frontend.',
-  )
-}
-
-function isLocalWebEnvironment(): boolean {
-  if (typeof window === 'undefined') {
-    return false
-  }
-
-  const hostname = window.location.hostname
-  return hostname === 'localhost' || hostname === '127.0.0.1'
 }
